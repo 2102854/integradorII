@@ -1,0 +1,446 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+</script>
+<style>
+    textarea {
+      resize: none;
+    }
+</style>
+<script>
+    function validate(field1, field2, field3){
+
+    const areatextarea = document.querySelector(field1);
+    const areatext = document.querySelector(field1).value.length;
+    const textcount = document.querySelector(field2);
+    const wordcount = document.querySelector(field3);
+    textcount.innerHTML = areatext;    
+     
+    if(areatext < 1){
+        wordcount.classList.add("d-none");
+    }else{
+        wordcount.classList.remove("d-none");
+    }
+}
+</script>     
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <h3>Agendamento de Paciente</h3>
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                </ul>   
+                <a class="btn btn-outline-secondary" href="/agendamentos" role="button">Cancelar</a>      
+            </div>
+        </div>
+    </nav>
+    <form class="needs-validation" novalidate method="post" >
+        <input type="hidden" class="form-control" id="usuario_id" name="usuario_id" placeholder="" value="1" maxlength="20" required>
+        <div class="form-row">
+            <div class="col-md-12 mb-3"></div>
+            <div class="col-md-12 mb-3">
+                <div class="col-md-6 p-1 slide">   
+                    <input type="hidden" class="form-control" id="paciente_id" name="paciente_id" placeholder="" value="" maxlength="20" required>
+                    <label for="nome">Nome do Paciente</label>     
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="nome" name="nome" placeholder="Nome do Paciente" value="" maxlength="250" minlength="3" aria-label="Nome do Paciente" aria-describedby="btnSearch1" readonly>
+                        <button class="btn btn-outline-secondary" type="button" id="btnSearch1" data-bs-toggle="modal" data-bs-target="#modalPaciente">
+                            <i class="bi bi-search"></i>
+                        </button>     
+                    </div>    
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Nome do Paciente inválido.
+                    </div>                 
+                </div>
+                <div class="col-md-5 p-1 slide"> 
+                    <input type="hidden" class="form-control" id="hospital_id" name="hospital_id" placeholder="" value="" maxlength="20" required>  
+                    <label for="hospital">Hospital de Encaminhamento</label>           
+                    <div class="input-group ">
+                        <input type="text" class="form-control" id="hospital" name="hospital" placeholder="Nome do Hospital" value="" maxlength="250" minlength="3" required aria-label="Nome do Hospital" aria-describedby="btnSearch2" readonly>
+                        <button class="btn btn-outline-secondary" type="button" id="btnSearch2" data-bs-toggle="modal" data-bs-target="#modalHospital">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>                    
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Hospital inválido.
+                    </div>               
+                </div>
+            </div>
+            <div class="col-md-11 mb-2">
+                <label for="responsavel_pac">Responsável Paciente</label>
+                <input type="text" class="form-control" id="responsavel_pac" name="responsavel_pac" placeholder="Responsável pelo paciente" value="" maxlength="200" minlength="5">
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
+                <div class="invalid-feedback">
+                    Nome do Responsável inválido.
+                </div>                
+            </div>
+            <div class="col-md-12 mb-2">
+                <div class="col-md-4 p-1 slide">
+                    <label for="encaminhamento">Tipo de encaminhamento</label>
+                    <select class="form-select form-select-lm mb-1" name="encaminhamento" id="encaminhamento" aria-label=".form-select" data-live-search="true" required>
+                        <option selected></option>
+                        {% for tipo_encaminhamento in tipo_encaminhamentos %}   
+                        <option value="{{tipo_encaminhamento.tipo_encaminhamento_id}}">{{tipo_encaminhamento.nome}}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Tipo de encaminhamento inválido.
+                    </div>                    
+                </div>
+                <div class="col-md-4 p-1 slide">
+                    <label for="doenca">Tipo de doença</label>
+                    <select class="form-select form-select-lm mb-1" name="doenca" id="doenca" aria-label=".form-select" data-live-search="true" required>
+                        <option selected></option>
+                        {% for tipo_doenca in tipo_doencas %}   
+                        <option value="{{tipo_doenca.tipo_doenca_id}}">{{tipo_doenca.nome}}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Tipo de doença inválida.
+                    </div>    
+                </div>     
+                <div class="col-md-3 p-1 slide">
+                    <label for="remocao">Tipo de remoção</label>
+                    <select class="form-select form-select-lm mb-1" name="remocao" id="remocao" aria-label=".form-select" data-live-search="true" required>
+                        <option selected></option>
+                        {% for tipo_remocao in tipo_remocoes %}   
+                        <option value="{{tipo_remocao.tipo_remocao_id}}">{{tipo_remocao.nome}}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Tipo de remoção inválida.
+                    </div>    
+                </div>              
+            </div>
+            <div class="col-md-12 mb-3">
+                <div class="col-md-6 p-1 slide">
+                    <label for="data_remocao">Data remoção</label>
+                    <input type="datetime-local" class="form-control" id="data_remocao" name="data_remocao"  value="" required>   
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Data Inválida.
+                    </div>                                   
+                </div> 
+                <div class="col-md-5 p-1 slide">
+                    <label for="saida_prevista">Saída prevista</label>
+                    <input type="datetime-local" class="form-control" id="saida_prevista" name="saida_prevista" value="" required>   
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Data Inválida.
+                    </div>                                   
+                </div>                                 
+            </div>
+            <div class="col-md-12 mb-3">
+                <div class="col-md-3 p-1 slide">
+                    <label for="remocao">Veículo / Placa</label>
+                    <select class="form-select form-select-lm mb-1" name="veiculo" id="veiculo" aria-label=".form-select" data-live-search="true" required>
+                        <option selected></option>
+                        {% for veiculo in veiculos %}   
+                        <option value="{{veiculo.veiculo_id}}">{{veiculo.modelo}} - {{veiculo.placa}}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Veiculo inválido.
+                    </div>    
+                </div>
+                <div class="col-md-4 p-1 slide">
+                    <label for="motorista">Motorista</label>
+                    <select class="form-select form-select-lm mb-1" name="motorista" id="motorista" aria-label=".form-select" data-live-search="true" required>
+                        <option selected></option>
+                        {% for motorista in motoristas %}   
+                        <option value="{{motorista.motorista_id}}">{{motorista.nome}}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Motorista inválido.
+                    </div>    
+                </div>                
+                <div class="col-md-2 p-1 slide">
+                    <label for="custo_IFD">IFD</label>
+                    <div class="input-group">
+                        <span class="input-group-text">R$</span>
+                        <input type="text" class="form-control" id="custo_IFD" name="custo_IFD" placeholder="Custo IFD" value="" maxlength="20" required>
+                        <div class="valid-feedback">
+                            Looks good!
+                        </div>
+                        <div class="invalid-feedback">
+                            IFD inválido.
+                        </div>   
+                        <span class="input-group-text">,00</span>   
+                    </div>
+                                
+                </div>  
+                <div class="col-md-2 slide">
+                    <label for="cep">Estadia</label>
+                    <div class="input-group">
+                        <span class="input-group-text">R$</span>
+                        <input type="text" class="form-control" id="custo_estadia" name="custo_estadia" placeholder="Custo estadia" value="" maxlength="20" required> 
+                        <span class="input-group-text">,00</span>  
+                        <div class="valid-feedback">
+                            Looks good!
+                        </div>   
+                        <div class="invalid-feedback">
+                            Custo da estadia inválido.
+                        </div>     
+                    </div>                           
+                </div>                                    
+
+            </div>
+            <div class="col-md-11 mb-3">   
+                <div class="form-floating">                    
+                    <textarea class="form-control" placeholder="Estado geral do paciente" name="estado_geral_paciente" id="estado_geral_paciente" onkeyup="validate('#estado_geral_paciente', '#textcount1', '#words_count1')" style="height: 100px" maxlength="500"></textarea>
+                    <label for="estado_geral_paciente">Estado Geral do Paciente</label>
+                </div>  
+                <div class="d-flex justify-content-end">
+                    <small>
+                        <span id="textcount1">0</span><span id="words_count1" class="d-none">&nbsp;de 500</span>
+                    </small>
+                </div>                                 
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
+                <div class="invalid-feedback">
+                    Estado geral inválido.
+                </div>                
+            </div>
+            <div class="col-md-11 mb-3">   
+                <div class="form-floating">                    
+                    <textarea class="form-control" placeholder="Leave a comment here" name="observacao" id="observacao" onkeyup="validate('#observacao', '#textcount2', '#words_count2')" style="height: 100px" maxlength="500"></textarea>
+                    <label for="observacao">Observação</label>
+                </div>  
+                <div class="d-flex justify-content-end">
+                    <small>
+                        <span id="textcount2">0</span><span id="words_count2" class="d-none">&nbsp;de 500</span>
+                    </small>
+                </div>                                 
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
+                <div class="invalid-feedback">
+                    Estado geral inválido.
+                </div>                
+            </div>    
+        </div>
+        <button class="btn btn-primary" type="submit">Salvar</button>      
+    </form>
+
+    <!--Paciente Dialog mode-->
+    <div id="modalPaciente" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">PACIENTES</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- CORPO AQUI-->
+                    <table class="table table-hover"
+                        id="table"
+                        data-locale="pt-BR"                        
+                        data-toolbar="#toolbar"
+                        data-toggle="table"
+                        data-pagination="true"
+                        data-search="true"
+                        data-show-columns="true"
+                        data-page-list="[5, 10, 15, 20, all]"
+                        data-side-pagination="local" 
+                        data-show-fullscreen="true"
+                        data-show-refresh="false"
+                        data-show-toggle="true"
+                        data-show-columns-toggle-all="true"
+                        data-detail-view="false"
+                        data-show-export="false"
+                        data-click-to-select="true"
+                        data-detail-formatter="detailFormatter"
+                        data-minimum-count-columns="2"
+                        data-show-pagination-switch="true"
+                        data-pagination="true"
+                        data-id-field="id"
+                        data-show-footer="false"
+                        data-response-handler="responseHandler"                        
+                        >
+                        <thead>
+                            <tr class="tr-class-1">
+                                <th data-field="paciente_id" class="text-wrap align-middle">REGISTRO</th>
+                                <th data-field="nome">NOME</th>
+                                <th data-field="data_nasc" class="align-middle">DT NASC</th>
+                                <th data-field="hygia">HYGIA</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for paciente in pacientes %}  
+                            <tr id="tr-{{paciente.paciente_id}}">
+                                <td id="td-{{paciente.paciente_id}}" class="align-middle">
+                                    {{paciente.paciente_id}}
+                                </td>
+                                <td >
+                                    {{paciente.nome}}
+                                </td>  
+                                <td class="align-middle">
+                                    {{paciente.data_nasc}}
+                                </td>                                   
+                                <td >
+                                    {{paciente.hygia}}
+                                </td>   
+                                <td>
+                                    <div class="center">
+                                        <a class="selecionar" href="javascript:selectPac({{paciente.paciente_id}},'{{paciente.nome}}')" title="SELECIONAR">
+                                            <i class="bi bi-check2-square"></i>
+                                        </a>
+                                    </div>
+                                </td>                            
+                            </tr> 
+                            {% endfor %}                      
+                        </tbody>
+                    </table>                  
+                    <!-- FIM CORPO-->
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   <!--Hospital Dialog mode-->
+   <div id="modalHospital" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title">HOSPITAL</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- CORPO AQUI-->
+                <table class="table table-hover"
+                    id="table"
+                    data-locale="pt-BR"                        
+                    data-toolbar="#toolbar"
+                    data-toggle="table"
+                    data-pagination="true"
+                    data-search="true"
+                    data-show-columns="true"
+                    data-page-list="[5, 10, 15, 20, all]"
+                    data-side-pagination="local" 
+                    data-show-fullscreen="true"
+                    data-show-refresh="false"
+                    data-show-toggle="true"
+                    data-show-columns-toggle-all="true"
+                    data-detail-view="false"
+                    data-show-export="false"
+                    data-click-to-select="true"
+                    data-detail-formatter="detailFormatter"
+                    data-minimum-count-columns="2"
+                    data-show-pagination-switch="true"
+                    data-pagination="true"
+                    data-id-field="id"
+                    data-show-footer="false"
+                    data-response-handler="responseHandler"                        
+                    >
+                    <thead>
+                        <tr class="tr-class-1">
+                            <th data-field="hospital_id" class="text-wrap align-middle">REGISTRO</th>
+                            <th data-field="nome">NOME</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for hospital in hospitais %}  
+                        <tr id="tr-{{hospital.hospital_id}}">
+                            <td id="td-{{hospital.hospital_id}}" class="align-middle">
+                                {{hospital.hospital_id}}
+                            </td>
+                            <td >
+                                {{hospital.nome}}
+                            </td>   
+                            <td>
+                                <div class="center">
+                                    <a class="selecionar" href="javascript:selectHospital({{hospital.hospital_id}},'{{hospital.nome}}')" title="SELECIONAR">
+                                        <i class="bi bi-check2-square"></i>
+                                    </a>
+                                </div>
+                            </td>                            
+                        </tr> 
+                        {% endfor %}                      
+                    </tbody>
+                </table>                  
+                <!-- FIM CORPO-->
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script>
+        /*
+        var elementCount = $('#nome').val();
+        console.log(elementCount);
+        // window.alert("Ei, você clicou !!!" + nome);
+        */
+
+        function selectPac(id,nome)
+        {
+            $("#nome").val(nome);
+            $("#paciente_id").val(id);
+            $("#modalPaciente").modal('hide'); 
+            //window.alert($("#paciente_id").val());           
+        }
+
+        function selectHospital(id,nome)
+        {
+            $("#hospital").val(nome);
+            $("#hospital_id").val(id);
+            $("#modalHospital").modal('hide'); 
+            //window.alert($("#paciente_id").val());           
+        }        
+
+        // Validador do formulário
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+               
+                var forms = document.getElementsByClassName('needs-validation');
+                var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>      
+
+{% endblock %}

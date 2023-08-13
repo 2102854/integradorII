@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <h3>Agendamento de Pacientes</h3>
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            </ul>
+            <a class="btn btn-outline-primary d-inline-flex align-items-center" href="/agendamentos/novo" role="button">Cadastrar</a>
+        </div>
+        </div>
+    </nav>
+    <table class="table table-hover" style="width:170%"
+        id="table"
+        data-locale="pt-BR"                        
+        data-toolbar="#toolbar"
+        data-toggle="table"
+        data-pagination="true"
+        data-search="true"
+        data-show-columns="true"
+        data-page-list="[5, 10, 15, 20, all]"
+        data-side-pagination="local" 
+        data-show-fullscreen="true"
+        data-show-refresh="false"
+        data-show-toggle="true"
+        data-show-columns-toggle-all="true"
+        data-detail-view="false"
+        data-show-export="true"
+        data-click-to-select="true"
+        data-detail-formatter="detailFormatter"
+        data-minimum-count-columns="2"
+        data-show-pagination-switch="true"
+        data-pagination="true"
+        data-id-field="id"
+        data-show-footer="false"
+        data-response-handler="responseHandler"
+        data-export-data-type="all"
+        data-export-types="['csv', 'txt', 'excel', 'pdf']"
+        >
+        <thead>
+            <tr class="table-secondary">
+                <th scope="col" data-field="agendamento_id"   style="width: 3%;" ><small>ID</small></th>
+                <th scope="col" data-field="nome"             style="width: 20%;"><small>NOME</small></th>
+                <th scope="col" data-field="hospital"         style="width: 20%;"><small>HOSPITAL</small></th>
+                <th scope="col" data-field="veiculo"          style="width: 10%;"><small>VEÍCULO</small></th>
+                <th scope="col" data-field="motorista"        style="width: 10%;"><small>MOTORISTA</small></th>
+                <th scope="col" data-field="dt_remocao"       style="width: 10%;"><small>DATA REMOÇÃO</small></th>                               
+                <th scope="col" data-field="dt_saida"         style="width: 10%;"><small>SAÍDA PREVISTA</small></th>
+                <th scope="col" data-field="custo_IFD"        style="width: 5%;" ><small>CUSTO IFD</small></th>
+                <th scope="col" data-field="custo_estadia"    style="width: 5%;" ><small>ESTADIA</small></th>
+                <th scope="col" data-field="responsavel_pac"  style="width: 15%;" ><small>RESPONSÁVEL</small></th>
+                <th scope="col" style="width: 3%;"></th>
+        </thead>
+        <tbody>
+            {% for result in results %}
+            <tr id="tr-{{result.Agendamento.agendamento_id}}">
+                <td style="width: 3%;" >{{result.Agendamento.agendamento_id }}</td>
+                <td style="width: 20%;">{{result.Paciente.nome}}</td>
+                <td style="width: 20%;">{{result.Hospital.nome}}</td>
+                <td style="width: 10%;">{{result.Veiculo.modelo}} - {{result.Veiculo.placa}}</td> 
+                <td style="width: 10%;">{{result.Motorista.nome}}</td> 
+                <td style="width: 10%;">{{result.Agendamento.data_remocao | format_datetime}}</td>                  
+                <td style="width: 10%;">{{result.Agendamento.saida_prevista | format_datetime}}</td>
+                <td style="width: 5%;" >R$ {{result.Agendamento.custo_IFD | format_real}}</td> 
+                <td style="width: 5%;" >R$ {{result.Agendamento.custo_estadia | format_real}}</td> 
+                <td style="width: 15%;" >{{result.Agendamento.responsavel_pac}}</td>                
+                <td  >
+                    <div class="row buttons justify-content-end">
+                        <div class="col-1">
+                            <a class="btn btn-outline-primary" href="/agendamentos/editar/{{result.Agendamento.agendamento_id}}">
+                                <i class="bi bi-brush"></i> 
+                            </a>                            
+                        </div>
+                        <div class="col-6"></div>                    
+                    </div>
+                </td>
+            </tr>
+            {% endfor %} 
+
+        </tbody>    
+    </table>
+{% endblock %}

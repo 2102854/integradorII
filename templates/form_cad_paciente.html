@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+</script>
+
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <h3>Cadastro de Paciente</h3>
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                </ul>   
+                <a class="btn btn-outline-secondary" href="/pacientes" role="button">Cancelar</a>      
+            </div>
+        </div>
+    </nav>
+    <form class="needs-validation" novalidate method="post" >
+        <div class="form-row">
+            <div class="col-md-11 mb-3"></div>
+            <div class="col-md-3 mb-3">
+                <label for="hygia">Hygia</label>
+                <input type="text" class="form-control" id="hygia" name="hygia" placeholder="Hygia" value="" maxlength="20" minlength="3" required>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
+                <div class="invalid-feedback">
+                    Nome do Paciente inválido.
+                </div>                
+            </div>  
+            <div class="col-md-11 mb-3">              
+                <div class="col-md-8 slide">
+                    <label for="nome">Nome do paciente</label>
+                    <input type="text" class="form-control" id="nome" name="nome" placeholder="Nome do Paciente" value="" maxlength="250" minlength="3" required>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Nome do Paciente inválido.
+                    </div>                
+                </div>
+                <div class="col-md-3 p-1 slide">
+                    <label for="data_nasc">Data de nascimento</label>
+                    <input type="text" class="form-control" id="data_nasc" name="data_nasc" placeholder="Data de Nascimento" value="" maxlength="10" minlength="10" required>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                    Data de nascimento inválida.
+                    </div>                
+                </div>
+            </div>
+            <div class="col-md-8 mb-3">
+                <div class="slide col-md-4">
+                    <label for="tel_1">Telefone principal</label>
+                    <input type="text" class="form-control" id="tel_1" name="tel_1" placeholder="Telefone principal" value="" maxlength="11" minlength="10" required>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                    Número do Telefone inválido.
+                    </div>
+                </div>  
+                <div class="slide col-md-4 p-1">
+                    <label for="tel_2">Telefone Contato</label>
+                    <input type="text" class="form-control" id="tel_2" name="tel_2" placeholder="Telefone contato" value="" maxlength="11" minlength="10">
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                    Número do Telefone inválido.
+                    </div>
+                </div>                               
+            </div>
+            <div class="col-md-10 mb-3">
+                <label for="cidade">Cidade</label>
+                <select class="form-select form-select-lm mb-1 " name="cidade" id="cidade" aria-label=".form-select" data-live-search="true" required>
+                    <option selected></option>
+                    {% for cidade in cidades %}   
+                    <option value="{{cidade.cidade_id}}">{{cidade.nome}}</option>
+                    {% endfor %}
+                </select>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
+                <div class="invalid-feedback">
+                    Cidade inválida.
+                </div>                     
+            </div>            
+            <div class="col-md-12 mb-3">
+                <div class="slide col-md-8">
+                    <label for="logradouro">Logradouro</label>
+                    <input type="text" class="form-control" id="logradouro" name="logradouro" placeholder="Logradouro" value="" maxlength="400" minlength="5" required>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Logradouro inválida.
+                    </div>     
+                </div>  
+                <div class="slide col-md-2 p-1">
+                    <label for="numero">Número</label>
+                    <input type="text" class="form-control" id="numero" name="numero" placeholder="Numero" value="" maxlength="11" minlength="1" required>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                    Número inválido.
+                    </div>
+                </div>                               
+            </div>            
+            <div class="col-md-4 mb-3">
+                <label for="complemento">Complemento</label>
+                <input type="text" class="form-control" id="complemento" name="complemento" placeholder="Complemento" value="" maxlength="50">   
+                <div class="valid-feedback">
+                    Looks good!
+                </div>           
+            </div>  
+            <div class="col-md-4 mb-3">
+                <label for="cep">Cep</label>
+                <input type="text" class="form-control" id="cep" name="cep" placeholder="Cep" value="" maxlength="10">     
+                <div class="valid-feedback">
+                    Looks good!
+                </div>         
+            </div>                       
+        </div>
+        <button class="btn btn-primary" type="submit">Salvar</button>
+    </form>
+    <script>
+        // Validador do formulário
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+               
+                var forms = document.getElementsByClassName('needs-validation');
+                var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>      
+
+{% endblock %}

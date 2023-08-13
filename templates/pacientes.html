@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <h3>Lista de Pacientes</h3>
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            </ul>
+            <a class="btn btn-outline-primary d-inline-flex align-items-center" href="/pacientes/novo" role="button">Cadastrar</a>
+        </div>
+        </div>
+    </nav>
+    <table class="table table-hover" style="width:99.7%"
+        id="table"
+        data-locale="pt-BR"                        
+        data-toolbar="#toolbar"
+        data-toggle="table"
+        data-pagination="true"
+        data-search="true"
+        data-show-columns="true"
+        data-page-list="[5, 10, 15, 20, all]"
+        data-side-pagination="local" 
+        data-show-fullscreen="true"
+        data-show-refresh="false"
+        data-show-toggle="true"
+        data-show-columns-toggle-all="true"
+        data-detail-view="false"
+        data-show-export="true"
+        data-click-to-select="true"
+        data-detail-formatter="detailFormatter"
+        data-minimum-count-columns="2"
+        data-show-pagination-switch="true"
+        data-pagination="true"
+        data-id-field="id"
+        data-show-footer="false"
+        data-response-handler="responseHandler"
+        data-export-data-type="all"
+        data-export-types="['csv', 'txt', 'excel', 'pdf']"
+        >
+        <thead>
+            <tr class="table-secondary">
+                <th class="col-1"><small>ID</small></th>
+                <th class="col-1"><small>HYGIA</small></th>
+                <th class="col-2"><small>NOME</small></th>
+                <th class="col-3"><small>ENDEREÇO</small></th>
+                <th class="col-1"><small>DATA NASCIMENTO</small></th>
+                <th class="col-1"><small>TELEFONE PRINCIPAL</small></th>
+                <th class="col-1"><small>TELEFONE</small></th>
+                <th class="col-2"></th>
+        </thead>
+        <tbody>
+            {% for result in results %}
+            <tr>
+                <td class="col-1 align-middle">{{ result.Paciente.paciente_id }}</td>
+                <td class="col-1 align-middle">{{ result.Paciente.hygia }}</td>
+                <td class="col-2 align-middle">{{ result.Paciente.nome }}</td>
+                <td class="col-3 align-middle">{{ result.Paciente.logradouro }}</td>
+                <td class="col-1 align-middle">{{ result.Paciente.data_nasc }}</td>
+                <td class="col-1 align-middle">{{ result.Paciente.tel_1 }}</td>   
+                <td class="col-1 align-middle">{{ result.Paciente.tel_2 }}</td>               
+                <td class="col-2 align-middle">
+                    <div class="row buttons justify-content-center">
+                        <div class="col-2">
+                            <a class="btn btn-outline-primary" href="/pacientes/editar/{{result.Paciente.paciente_id}}">
+                                <i class="bi bi-brush"></i> 
+                            </a>                            
+                        </div>  
+                        <div class="col-2"></div>                
+                    </div>
+                </td>
+            </tr>
+        {% endfor %} 
+
+        </tbody>    
+    </table>
+    <!-- Modal -->
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">ATENÇÃO</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Deseja excluir o registro?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger">Excluir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

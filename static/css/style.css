@@ -1,0 +1,5 @@
+.slide
+{
+    display: inline-block; /*Display inline and maintain block characteristics.*/
+    white-space: normal; /*Prevents child elements from inheriting nowrap.*/
+}

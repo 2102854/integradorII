@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <h3>Cadastro de País</h3>
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                </ul>   
+                <a class="btn btn-outline-secondary" href="/paises" role="button">Cancelar</a>      
+            </div>
+        </div>
+    </nav>
+    <form class="needs-validation" novalidate method="post" >
+        <div class="form-row">
+            <div class="col-md-4 mb-3">
+                <label for="nome">Nome do País</label>
+                <input type="text" class="form-control" id="nome" name="nome" placeholder="Nome do País" value="" maxlength="250" minlength="3" required>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
+                <div class="invalid-feedback">
+                    Nome do país inválido.
+                </div>                
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="sigla">Sigla</label>
+                <input type="text" class="form-control" id="sigla" name="sigla" placeholder="Sigla" value="" maxlength="3" minlength="2" required>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
+                <div class="invalid-feedback">
+                   Sigla inválida.
+                </div>                
+            </div>
+        </div>
+        <button class="btn btn-primary" type="submit">Salvar</button>
+    </form>
+    <script>
+        // Validador do formulário
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+               
+                var forms = document.getElementsByClassName('needs-validation');
+                var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>      
+
+{% endblock %}
