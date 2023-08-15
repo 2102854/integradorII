@@ -1,22 +1,13 @@
 from config import parameters
-from flask import Flask, request, jsonify, make_response 
+from flask import request, jsonify, make_response
 import jwt 
-from datetime import datetime, timedelta 
 from functools import wraps 
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.dialects.sqlite import (BLOB, BOOLEAN, CHAR, DATE, DATETIME, DECIMAL, FLOAT, INTEGER, NUMERIC, JSON, SMALLINT, TEXT, TIME, TIMESTAMP, VARCHAR)
-from sqlalchemy import create_engine, func
-from sqlalchemy import select
-from sqlalchemy.orm import Session
-from sqlalchemy.sql.operators import ilike_op
 from werkzeug.security import check_password_hash
-
 from usuario import Usuario
 from seguranca.business_exception import BusinessException
+from seguranca.token import Token
 
-Base = declarative_base()
-
-class Auth(Base): 
+class Auth(): 
     def token_required(f): 
         @wraps(f) 
         def decorated(*args, **kwargs): 
@@ -24,57 +15,56 @@ class Auth(Base):
             if 'x-access-token' in request.headers: 
                 token = request.headers['x-access-token'] 
             if not token: 
-                return jsonify({'message' : 'Token is missing !!'}), 401
+                return jsonify({'message' : 'Token não informado'}), 401
             try: 
-                data = jwt.decode(token, parameters['SECRET_KEY']) 
-                #current_user = User.query.filter_by(public_id = data['public_id']).first() 
-                current_user = ''
-            except: 
-                return jsonify({'message' : 'Token is invalid !!'}), 401
+                # Valida o token informado
+                Token.valida_token(token)
+                
+                # Decodifica o Token
+                chave_publica = jwt.decode(token, parameters['SECRET_KEY']) 
+                
+                # Recupera os dados do usuário e executa validações
+                usuario = Usuario.get_usuario_by_chave_publica(chave_publica)
+                if not usuario:
+                    return jsonify({'message' : 'Usuário Bloqueado!'}), 401
+                if not usuario.ativo:
+                    return jsonify({'message' : 'Usuário Bloqueado!'}), 401                
+                
+            except Exception as err: 
+                return jsonify({'message' : err}), 401
         
-            return  f(current_user, *args, **kwargs)     
+            return  f(usuario.usuario_id, *args, **kwargs)    
+         
         return decorated
 
     def login(email, senha): 
-           
-        # Verifica se as informações foram passadas corretamente para executar o login
-        if not email or not senha: 
-            raise BusinessException('E-mail ou Senha não é válido.')
-            """
-            return make_response( 
-                'Could not verify', 
-                401, 
-                {'WWW-Authenticate' : 'Basic realm ="Login required !!"'} 
-            ) 
-            """        
-        # Valida o e-mail informado
-        if not Usuario.email_eh_valido(email):
-            raise BusinessException('E-mail não é Válido')
-    
-        usuario = Usuario.get_usuario_by_email(email) 
-        if not usuario:
-            raise BusinessException('E-mail ou Senha não é válido.') 
-            """
-            return make_response( 
-                'Could not verify', 
-                401, 
-                {'WWW-Authenticate' : 'Basic realm ="User does not exist !!"'} 
-            ) 
-            """
-        # Valida a senha do Usuário
-        if not check_password_hash(usuario.senha, senha): 
-            raise BusinessException('E-mail ou Senha não é válido.')
+        try:           
+            # Verifica se as informações foram passadas corretamente para executar o login
+            print('aqui')
+            if not email or not senha: 
+                print('aqui1')
+                return make_response('Não foi possível verificar', 401, {'WWW-Authenticate' : 'Basic realm =E-mail ou Senha não é válido'})
         
-        """
-        token = jwt.encode({ 
-                'public_id': user.public_id, 
-                'exp' : datetime.utcnow() + timedelta(minutes = 30) 
-            }, app.config['SECRET_KEY']) 
-        return make_response(jsonify({'token' : token.decode('UTF-8')}), 201) 
-        
-        return make_response( 
-            'Could not verify', 
-            403, 
-            {'WWW-Authenticate' : 'Basic realm ="Wrong Password !!"'} 
-        ) 
-        """    
+            # Valida o e-mail informado
+            print('aqui2')
+            if not Usuario.email_eh_valido(email):
+                print('aqui3')
+                return make_response('Não foi possível verificar', 401, {'WWW-Authenticate' : 'Basic realm =E-mail não é Válido'})
+            
+            print('aqui4')
+            usuario = Usuario.get_usuario_by_email(email)             
+            if not usuario:
+                print('aqui5')
+                return make_response('Não foi possível verificar', 401, {'WWW-Authenticate' : 'Basic realm =E-mail ou Senha não é válido'}) 
+
+            # Valida a senha do Usuário
+            if not check_password_hash(usuario.senha, senha): 
+                return make_response('Não foi possível verificar', 401, {'WWW-Authenticate' : 'Basic realm =E-mail ou Senha não é válido'})
+            
+            # Gera o Token de Autenticação
+            token = Token.add_token(usuario.usuario_id, usuario.chave_publica)
+
+            return token 
+
+        except Exception:
+            return make_response('Não foi possível verificar', 401, {'WWW-Authenticate' : 'Basic realm =Erro desconhecido'})

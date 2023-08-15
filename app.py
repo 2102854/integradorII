@@ -15,15 +15,16 @@ import locale
 from models import Estado, Cidade, Veiculo, Hospital, Paciente, Motorista, Usuario, Tipo_Doenca, Tipo_Encaminhamento, Tipo_Remocao, Agendamento
 from pais import Pais
 from usuario import Usuario
-from flask import Flask, render_template, url_for, flash, redirect, request, jsonify
+from flask import Flask, render_template, url_for, flash, redirect, request, jsonify, make_response
 from sqlalchemy import create_engine, func
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.operators import ilike_op
 
 from seguranca.business_exception import BusinessException
-import uuid
-import jwt
+from seguranca.autenticacao import Auth
+from seguranca.token import Token
+
 
 # Configuração da aplicação
 app = Flask(__name__)
@@ -122,8 +123,29 @@ def index():
     return render_template('index.html', hospitais=num_hospitais, pacientes=num_pacientes, agendamentos=num_agendamentos,
                           lt_hospitais=lt_hospitais, lt_pacientes=lt_pacientes, lt_agendamentos=lt_agendamentos)
 
+# Realiza a autenticação do usuário
+@app.route('/login', methods=['POST'])
+def login():    
+    # Verifica se existe um token na chamada
+    token = None
+    if 'x-access-token' in request.headers:
+        try: 
+            token = request.headers['x-access-token'] 
+            Token.valida_token(token)
+            return make_response(jsonify({'token' : token.decode('UTF-8')}), 201)
+        except Exception as err:
+            return make_response('Não foi possível verificar', 401, {'WWW-Authenticate' : 'Basic realm =Token inválido'})  
+    else:
+        try:
+            # Executa a validação dos dados informados
+            token = Auth.login(request.form['email'], request.form['senha'])
+            return make_response(jsonify({'token' : token.decode('UTF-8')}), 201)
+        except Exception as err:
+            return make_response('Dados incorretos', 401, {'WWW-Authenticate' : 'Basic realm =Dados incorretos'}) 
+        
 # Recupera todos os Países Cadastrados no Banco de Dados
 @app.route('/paises', methods=['GET'])
+@Auth.token_required
 def get_paises():
     try:
         paises = Pais.get_paises(1)
@@ -143,6 +165,18 @@ def get_usuarios():
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 401
+    
+
+"""
+return make_response( 
+    'Could not verify', 
+    401, 
+    {'WWW-Authenticate' : 'Basic realm ="Login required !!"'} 
+) 
+
+
+ return make_response(jsonify({'token' : token.decode('UTF-8')}), 201) 
+""" 
 
     #return render_template('paises.html',paises=paises)
 

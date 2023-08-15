@@ -149,6 +149,11 @@ class Usuario (Base):
     def get_usuario_by_email(email):
         usuario = session.query(Usuario).where(Usuario.email == email)
         return usuario
+    
+    # Retorna os dados do usuário pela chave pública
+    def get_usuario_by_chave_publica(chave_publica):
+        usuario = session.query(Usuario).where(Usuario.chave_publica == chave_publica)
+        return usuario    
 
     def update_usuarios():
 
