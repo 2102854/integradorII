@@ -9,10 +9,6 @@ from sqlalchemy.dialects.sqlite import (BLOB, BOOLEAN, CHAR, DATE, DATETIME, DEC
 from sqlalchemy import create_engine, select, and_ , or_, update
 from sqlalchemy.orm import Session
 
-
-from usuario import Usuario
-from seguranca.business_exception import BusinessException
-
 Base = declarative_base()
 
 # Mapeia o banco de dados
@@ -31,7 +27,8 @@ class Token (Base):
     expirado = Column(BOOLEAN, nullable=False, default=False)
 
     def __repr__(self) -> str:
-        return f"Tipo_Responsavel(tipo_Responsavel_id={self.tipo_responsavel_id!r},nome={self.nome!r})" #Precisa corrigir
+        return f"Token(token_id={self.token_id!r},data_criacao={self.data_criacao!r},data_expiracao={self.data_expiracao!r},token={self.token!r},\
+            usuario_id={self.usuario_id!r},chave_publica={self.chave_publica!r},expirado={self.expirado!r})" 
     
     def __init__(self, data_criacao, data_expiracao, token, usuario_id, chave_publica, expirado):
         self.data_criacao = data_criacao

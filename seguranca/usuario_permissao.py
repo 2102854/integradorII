@@ -41,12 +41,12 @@ class Usuario_Permissao (Base):
         }         
 
     # Retorna se o usuário possui a permissão requerida
-    def usuario_possui_permissao(usuario, permissao):   
+    def usuario_possui_permissao(usuario, permissao_id):   
 
         rows = session.query(Usuario_Permissao).where(
                 and_(
                     Usuario_Permissao.usuario_id == usuario,
-                    Usuario_Permissao.permissao_id == permissao)
+                    Usuario_Permissao.permissao_id == permissao_id)
                 ).count()   
         if rows == 0:
             return False

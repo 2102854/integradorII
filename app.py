@@ -24,6 +24,7 @@ from sqlalchemy.sql.operators import ilike_op
 from seguranca.business_exception import BusinessException
 from seguranca.autenticacao import Auth
 from seguranca.token import Token
+from seguranca.grupo import Grupo
 
 
 # Configuração da aplicação
@@ -167,6 +168,18 @@ def get_usuarios(usuario_id):
         response = jsonify({'message err': f'{err}'})
         return response, 401
     
+# Recupera todos os Grupos Cadastrados no Banco de Dados
+@app.route('/grupos', methods=['GET'])
+@Auth.token_required
+def get_grupos(usuario_id):
+    try:
+        grupos = Grupo.get_grupos(usuario_id)
+        g = dict_helper(grupos) 
+        return jsonify(grupos = g)            
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 401
+
 
 """
 return make_response( 

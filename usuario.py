@@ -35,7 +35,8 @@ class Usuario (Base):
     chave_publica = Column(TEXT(100), nullable=False)
 
     def __repr__(self) -> str:
-        return f"Usuario(usuario_id={self.usuario_id!r},primeiro_nome={self.primeiro_nome!r},sobrenome={self.sobrenome!r},senha={self.senha!r},email={self.ativo!r},email={self.ativo!r},email={self.chave_publica!r})"
+        return f"Usuario(usuario_id={self.usuario_id!r},primeiro_nome={self.primeiro_nome!r},sobrenome={self.sobrenome!r},\
+            senha={self.senha!r},email={self.ativo!r},email={self.ativo!r},email={self.chave_publica!r})"
     
     def __init__(self, primeiro_nome, sobrenome, username, senha, email, ativo):
         self.primeiro_nome = primeiro_nome
@@ -66,10 +67,10 @@ class Usuario (Base):
             return False           
     
     # Retorna os usuários cadastrados
-    def get_usuarios(userId):
+    def get_usuarios(usuario_id):
         try:
             # Verifica se o usuário pode ver o conteúdo da tabela usuário
-            acesso_liberado = Permissao.valida_permissao_usuario(userId, 4)
+            acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Visualizar_Usuarios')
             if not acesso_liberado:                
                 raise BusinessException('Usuário não possui permissão para visualização da lista de usuários')
             usuarios = session.query(Usuario).all()  
@@ -85,7 +86,7 @@ class Usuario (Base):
     def add_usuarios(usuario_id, primeiro_nome, sobrenome, senha, email):
         try:
             # Verifica se o usuário pode adicionar um novo usuario usuário
-            acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 5)
+            acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Adicionar_Usuarios')
             if not acesso_liberado:                
                 raise BusinessException('Usuário não possui permissão para adicionar novos usuários')
             
@@ -158,7 +159,6 @@ class Usuario (Base):
         return usuario    
 
     def update_usuarios():
-
         sql = select(Usuario).where(Usuario.usuario_id == 3)
         usuario = session.scalars(sql).one()
                 
