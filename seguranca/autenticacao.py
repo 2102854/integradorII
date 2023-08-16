@@ -17,12 +17,14 @@ class Auth():
             if not token: 
                 return jsonify({'message' : 'Token não informado'}), 401
             try: 
+                
                 # Valida o token informado
                 Token.valida_token(token)
-                
+
                 # Decodifica o Token
-                chave_publica = jwt.decode(token, parameters['SECRET_KEY']) 
-                
+                payload = jwt.decode(token, parameters['SECRET_KEY'], algorithms=["HS256"]) 
+                chave_publica = payload['chave_publica']
+
                 # Recupera os dados do usuário e executa validações
                 usuario = Usuario.get_usuario_by_chave_publica(chave_publica)
                 if not usuario:
@@ -31,7 +33,7 @@ class Auth():
                     return jsonify({'message' : 'Usuário Bloqueado!'}), 401                
                 
             except Exception as err: 
-                return jsonify({'message' : err}), 401
+                return jsonify({'message' : f'{err}'}), 401
         
             return  f(usuario.usuario_id, *args, **kwargs)    
          
@@ -40,23 +42,17 @@ class Auth():
     def login(email, senha): 
         try:           
             # Verifica se as informações foram passadas corretamente para executar o login
-            print('aqui')
-            if not email or not senha: 
-                print('aqui1')
+            if not email or not senha:                 
                 return make_response('Não foi possível verificar', 401, {'WWW-Authenticate' : 'Basic realm =E-mail ou Senha não é válido'})
         
-            # Valida o e-mail informado
-            print('aqui2')
-            if not Usuario.email_eh_valido(email):
-                print('aqui3')
+            # Valida o e-mail informado    
+            if not Usuario.email_eh_valido(email):        
                 return make_response('Não foi possível verificar', 401, {'WWW-Authenticate' : 'Basic realm =E-mail não é Válido'})
             
-            print('aqui4')
             usuario = Usuario.get_usuario_by_email(email)             
             if not usuario:
-                print('aqui5')
                 return make_response('Não foi possível verificar', 401, {'WWW-Authenticate' : 'Basic realm =E-mail ou Senha não é válido'}) 
-
+            
             # Valida a senha do Usuário
             if not check_password_hash(usuario.senha, senha): 
                 return make_response('Não foi possível verificar', 401, {'WWW-Authenticate' : 'Basic realm =E-mail ou Senha não é válido'})

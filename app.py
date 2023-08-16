@@ -139,16 +139,16 @@ def login():
         try:
             # Executa a validação dos dados informados
             token = Auth.login(request.form['email'], request.form['senha'])
-            return make_response(jsonify({'token' : token.decode('UTF-8')}), 201)
+            return make_response(jsonify({'token' : token}), 201)
         except Exception as err:
             return make_response('Dados incorretos', 401, {'WWW-Authenticate' : 'Basic realm =Dados incorretos'}) 
         
 # Recupera todos os Países Cadastrados no Banco de Dados
 @app.route('/paises', methods=['GET'])
 @Auth.token_required
-def get_paises():
+def get_paises(usuario_id):
     try:
-        paises = Pais.get_paises(1)
+        paises = Pais.get_paises(usuario_id)
         p = dict_helper(paises) 
         return jsonify(paises = p)            
     except Exception as err:
@@ -157,9 +157,10 @@ def get_paises():
 
 # Recupera todos os Usuários Cadastrados no Banco de Dados
 @app.route('/usuarios', methods=['GET'])
-def get_usuarios():
+@Auth.token_required
+def get_usuarios(usuario_id):
     try:
-        usuarios = Usuario.get_usuarios(1)
+        usuarios = Usuario.get_usuarios(usuario_id)
         u = dict_helper(usuarios) 
         return jsonify(usuarios = u)            
     except Exception as err:

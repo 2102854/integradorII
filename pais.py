@@ -44,10 +44,10 @@ class Pais (Base):
         }         
 
     # Retorna os países cadastrados
-    def get_paises(userId):
+    def get_paises(usuario_id):
         try:
             # Verifica se o usuário pode ver o conteúdo da tabela países
-            acesso_liberado = Permissao.valida_permissao_usuario(userId, 1)
+            acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 1)
             if not acesso_liberado:                
                 raise BusinessException('Usuário não Possui permissão para visualização dos países')
             paises = session.query(Pais).all()   

@@ -1,17 +1,14 @@
 from config import parameters
 from sqlalchemy import  Column
-from flask import Flask, request, jsonify, make_response 
 import jwt 
 from datetime import datetime, timedelta 
 import pytz
 from functools import wraps 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.sqlite import (BLOB, BOOLEAN, CHAR, DATE, DATETIME, DECIMAL, FLOAT, INTEGER, NUMERIC, JSON, SMALLINT, TEXT, TIME, TIMESTAMP, VARCHAR)
-from sqlalchemy import create_engine, func
-from sqlalchemy import select
+from sqlalchemy import create_engine, select, and_ , or_, update
 from sqlalchemy.orm import Session
-from sqlalchemy.sql.operators import ilike_op
-from werkzeug.security import check_password_hash
+
 
 from usuario import Usuario
 from seguranca.business_exception import BusinessException
@@ -58,10 +55,21 @@ class Token (Base):
 
      # Gera o Token de Autenticação
     def add_token(usuario_id, chave_publica):
-        # New Token  #'exp' : datetime.utcnow() + timedelta(minutes = 30) 
+        # Caso o usuário possui outros tokens, marca todos com expirado.
+        u = (update(Token).where(
+                    and_(
+                        Token.usuario_id == usuario_id,
+                        Token.expirado == False
+                    )).values(expirado = True))
+        
+        session.execute(u)
+        session.commit()
+
+        # New Token
         n_token = jwt.encode({ 
-                'chave_publica': chave_publica               
-            }, parameters['SECRET_KEY'])     
+                'chave_publica': chave_publica,
+                'exp' : datetime.utcnow() + timedelta(minutes = parameters['LOGOUT_MINUTES'])              
+            }, parameters['SECRET_KEY'], algorithm="HS256")     
         
         dt_criacao = datetime.now(pytz.timezone(parameters['TIMEZONE']))
         dt_expiracao = datetime.now(pytz.timezone(parameters['TIMEZONE'])) + timedelta(minutes = parameters['LOGOUT_MINUTES'])        
@@ -72,7 +80,25 @@ class Token (Base):
         session.commit()  
         
         return n_token 
-     
+    
+    # Formata data para comparação
+    def formata_data(d):
+        r = []
+        s1 = str(d).split()
+        d1 = s1[0].split('-')
+        
+        for x in d1:
+            r.append(int(x))
+
+        t1 = s1[1].split(':')
+        ss = t1[2].split('.')
+        r.append(int(t1[0]))
+        r.append(int(t1[1]))
+        r.append(int(ss[0]))
+        dt = datetime(r[0], r[1], r[2], r[3], r[4], r[5])
+        return dt 
+
+
     # Valida o Token informado
     def valida_token(n_token):
         try:    
@@ -82,21 +108,24 @@ class Token (Base):
 
             # Se o token não existir
             if not token:
-                raise BusinessException('Token Inválido')
-            
+                raise Exception('Token Inválido!')
+                        
             # Se o toke estiver expirado
             if token.expirado:
-                raise BusinessException('Token Expirado')
+                raise Exception('Token Expirado!')
             
             # Se a data de expiração for menor que a data atual
-            if token.data_expiracao < datetime.now(pytz.timezone(parameters['TIMEZONE'])):
-                raise BusinessException('Token Expirado')
+            dt_now = Token.formata_data(datetime.now(pytz.timezone(parameters['TIMEZONE'])))
+            dt_exp = Token.formata_data(token.data_expiracao)
+
+            if dt_exp < dt_now:
+                token.expirado = True
+                session.commit()                
+                raise Exception('Token Expirado!')
 
             # Atualiza a data de expiração do token
             token.data_expiracao = datetime.now(pytz.timezone(parameters['TIMEZONE'])) + timedelta(minutes = parameters['LOGOUT_MINUTES'])              
             session.commit()  
                                 
-        except BusinessException as err:
-            raise Exception(err)
-        except Exception:
-            return Exception('Erro desconhecido')         
+        except Exception as err:
+            raise Exception(err)        

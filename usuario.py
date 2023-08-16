@@ -14,7 +14,7 @@ from seguranca.business_exception import BusinessException
 import uuid
 import re 
 
-regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
+regex = '[a-z0-9!#$%&’*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&’*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?'
 
 Base = declarative_base()
 
@@ -29,13 +29,13 @@ class Usuario (Base):
     primeiro_nome = Column(TEXT(30), nullable=False)
     sobrenome =  Column(TEXT(100), nullable=False)
     username = Column(TEXT(150), nullable=False)
-    senha = Column(TEXT(128), nullable=False)
-    email = Column(TEXT(250), nullable=False)
+    senha = Column(VARCHAR(500), nullable=False)
+    email = Column(VARCHAR(250), nullable=False)
     ativo = Column(BOOLEAN, nullable=False)
     chave_publica = Column(TEXT(100), nullable=False)
 
     def __repr__(self) -> str:
-        return f"Tipo_Responsavel(tipo_Responsavel_id={self.tipo_responsavel_id!r},nome={self.nome!r})" #Precisa corrigir
+        return f"Usuario(usuario_id={self.usuario_id!r},primeiro_nome={self.primeiro_nome!r},sobrenome={self.sobrenome!r},senha={self.senha!r},email={self.ativo!r},email={self.ativo!r},email={self.chave_publica!r})"
     
     def __init__(self, primeiro_nome, sobrenome, username, senha, email, ativo):
         self.primeiro_nome = primeiro_nome
@@ -82,10 +82,10 @@ class Usuario (Base):
             # tratamento de erro desconhecido
             return Exception('Erro desconhecido')
 
-    def add_usuarios(userId, primeiro_nome, sobrenome, senha, email):
+    def add_usuarios(usuario_id, primeiro_nome, sobrenome, senha, email):
         try:
             # Verifica se o usuário pode adicionar um novo usuario usuário
-            acesso_liberado = Permissao.valida_permissao_usuario(userId, 5)
+            acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 5)
             if not acesso_liberado:                
                 raise BusinessException('Usuário não possui permissão para adicionar novos usuários')
             
@@ -147,12 +147,14 @@ class Usuario (Base):
     
     # Retorna os dados do usuário pelo parametro e-mail
     def get_usuario_by_email(email):
-        usuario = session.query(Usuario).where(Usuario.email == email)
+        sql = select(Usuario).where(Usuario.email == email)
+        usuario = session.scalars(sql).one()
         return usuario
-    
+
     # Retorna os dados do usuário pela chave pública
     def get_usuario_by_chave_publica(chave_publica):
-        usuario = session.query(Usuario).where(Usuario.chave_publica == chave_publica)
+        sql = select(Usuario).where(Usuario.chave_publica == chave_publica)
+        usuario = session.scalars(sql).one()
         return usuario    
 
     def update_usuarios():
