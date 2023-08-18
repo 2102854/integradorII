@@ -65,7 +65,7 @@ class Token (Base):
         # New Token
         n_token = jwt.encode({ 
                 'chave_publica': chave_publica,
-                'exp' : datetime.utcnow() + timedelta(minutes = parameters['LOGOUT_MINUTES'])              
+                'exp' : datetime.utcnow() + timedelta(hours= 8)              
             }, parameters['SECRET_KEY'], algorithm="HS256")     
         
         dt_criacao = datetime.now(pytz.timezone(parameters['TIMEZONE']))

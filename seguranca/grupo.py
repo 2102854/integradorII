@@ -22,8 +22,8 @@ class Grupo (Base):
     __tablename__ = "GRUPO"
 
     grupo_id = Column(INTEGER, primary_key=True)
-    nome = Column(TEXT(250), nullable=False)
-    descricao = Column(TEXT(250), nullable=False)
+    nome = Column(VARCHAR(250), nullable=False)
+    descricao = Column(VARCHAR(250), nullable=False)
     admin = Column(BOOLEAN, nullable=False, default=False)
     ativo = Column(BOOLEAN, nullable=False, default=False)
 
@@ -46,6 +46,16 @@ class Grupo (Base):
             'ativo': self.ativo
         }  
     
+    # Valida campos booleans passados em formulário
+    def check_bool_field(b):
+        if not b:
+            return 0
+        else:
+            if b == False or b == 'False' or b== '0':
+                return 0
+            elif b == True or b == 'True' or b== '1':
+                return 1
+
     # Retorna os grupos cadastrados
     def get_grupos(usuario_id):
         try:
@@ -61,3 +71,89 @@ class Grupo (Base):
         except Exception:
             # tratamento de erro desconhecido
             return Exception('Erro desconhecido')    
+        
+    def add_grupo(usuario_id, nome, descricao, admin, ativo):
+        try:
+            # Verifica se o usuário pode adicionar um novo grupo ao sistema
+            acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Adicionar_Grupo')
+            if not acesso_liberado:                
+                raise BusinessException('Usuário não possui permissão para adicionar novos grupos')
+            
+            # Verifica se os campos estão preenchidos
+            if nome == '' or  not nome:
+                raise BusinessException('Nome do grupo é obrigatório')
+
+            if descricao == '' or  not descricao:
+                raise BusinessException('Descrição do grupo é obrigatório') 
+
+            admin = Grupo.check_bool_field(admin)
+            ativo = Grupo.check_bool_field(ativo)
+                                 
+            # Verifica se já existe um grupo cadastrado no banco de dados
+            rows = session.query(Grupo).where(Grupo.nome == nome).count()   
+            if rows > 0:
+                raise BusinessException('Grupo já cadastrado no banco de dados')
+
+            novoGrupo = Grupo(
+                nome = nome,
+                descricao = descricao,
+                admin = int(admin),
+                ativo = int(ativo)
+            )
+
+            # Adiciona um novo usuário
+            session.add(novoGrupo)  
+            session.commit()
+            return novoGrupo
+        
+        except BusinessException as err:
+            raise Exception(err)
+        except Exception as e:
+            print(e)
+            # tratamento de erro desconhecido
+            return Exception('Erro desconhecido')    
+
+    def update_grupo(usuario_id, nome, descricao, admin, ativo):
+        try:
+            # Verifica se o usuário pode adicionar um novo grupo ao sistema
+            acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Editar_Grupo')
+            if not acesso_liberado:                
+                raise BusinessException('Usuário não possui permissão para editar os dados de grupos')
+            
+            # Verifica se os campos estão preenchidos
+            if nome == '' or  not nome:
+                raise BusinessException('Nome do grupo é obrigatório')
+
+            if descricao == '' or  not descricao:
+                raise BusinessException('Descrição do grupo é obrigatório')
+
+            admin = Grupo.check_bool_field(admin)
+            ativo = Grupo.check_bool_field(ativo)                        
+                                 
+            # Recupera os dados do grupo informado
+            sql = select(Grupo).where(Grupo.grupo_id == usuario_id)
+            grupo = session.scalars(sql).one()
+            if not grupo:
+                raise BusinessException('Grupo informado não encontrado')
+            
+            # Verifica se o nome do grupo alterou, se sim, precisa checar se já existe um cadastrado no sistema
+            if grupo.nome != nome:
+                
+            """
+            novoGrupo = Grupo(
+                nome = nome,
+                descricao = descricao,
+                admin = int(admin),
+                ativo = int(ativo)
+            )
+            """
+            # Adiciona um novo usuário             
+            session.commit()
+            return novoGrupo
+        
+        except BusinessException as err:
+            raise Exception(err)
+        except Exception as e:
+            print(e)
+            # tratamento de erro desconhecido
+            return Exception('Erro desconhecido')  

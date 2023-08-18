@@ -9,6 +9,7 @@
 
 # Referencias
 import locale
+import json
 #from datetime import date, datetime, time
 #from babel.dates import format_date, format_datetime, format_time
 #https://babel.pocoo.org/en/latest/dates.html
@@ -33,9 +34,14 @@ app.config['JSON_AS_ASCII'] = False
 app.config['DEBUG'] = True
 
 
-# Cria o dicionário da Classe para retorno json
-def dict_helper(objlist):
+# Cria um retorno de dicionário de uma lista de objetos para retorno json
+def dict_helper_list(objlist):
     result = [item.obj_to_dict() for item in objlist]
+    return result
+
+# Cria um retorno de dicionário de um objeto para retorno json
+def dict_helper_obj(obj):
+    result = json.JSONDecoder().decode(json.dumps(obj.obj_to_dict(), indent = 2))
     return result
 
 locale.setlocale( locale.LC_ALL,'pt_BR.UTF-8' )
@@ -150,7 +156,7 @@ def login():
 def get_paises(usuario_id):
     try:
         paises = Pais.get_paises(usuario_id)
-        p = dict_helper(paises) 
+        p = dict_helper_list(paises) 
         return jsonify(paises = p)            
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
@@ -162,7 +168,7 @@ def get_paises(usuario_id):
 def get_usuarios(usuario_id):
     try:
         usuarios = Usuario.get_usuarios(usuario_id)
-        u = dict_helper(usuarios) 
+        u = dict_helper_list(usuarios) 
         return jsonify(usuarios = u)            
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
@@ -174,50 +180,37 @@ def get_usuarios(usuario_id):
 def get_grupos(usuario_id):
     try:
         grupos = Grupo.get_grupos(usuario_id)
-        g = dict_helper(grupos) 
+        g = dict_helper_list(grupos) 
         return jsonify(grupos = g)            
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 401
 
+# Adiciona um Grupo no Banco de Dados
+@app.route('/grupos/add', methods=['POST'])
+@Auth.token_required
+def add_grupo(usuario_id):
+    try:
+        grupo = Grupo.add_grupo(usuario_id,request.form['nome'], request.form['descricao'],request.form['admin'], request.form['ativo'])
+        g = dict_helper_obj(grupo)
+        return jsonify(grupo = g)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 401
 
-"""
-return make_response( 
-    'Could not verify', 
-    401, 
-    {'WWW-Authenticate' : 'Basic realm ="Login required !!"'} 
-) 
-
-
- return make_response(jsonify({'token' : token.decode('UTF-8')}), 201) 
-""" 
-
-    #return render_template('paises.html',paises=paises)
-
-    #nome = request.args.get('nome', default = '', type = str)
-    #if nome == '':    
-    #    paises = session.query(Pais).all()        
-    #else:
-    #    paises = session.query(Pais).filter(ilike_op(Pais.nome,f'%{nome}%')).all()
-    #return render_template('paises.html',paises=paises)
-
-#Abre a página de cadastro de países
-#@app.route('/paises/novo/', methods=('GET', 'POST'))
-#def pais_add():
-#    if request.method == 'POST':
-
-#        novoPais = Pais(request.form['nome'], request.form['sigla'])
-#        session.add(novoPais)        
-#        session.commit()        
-#        return redirect(url_for('paises'))    
+# Edita um Grupo já cadastrado no Banco de Dados
+@app.route('/grupos/update/<grupo_id>', methods=['POST'])
+@Auth.token_required
+def update_grupo(usuario_id, grupo_id):
+    try:
+        grupo = Grupo.update_grupo(usuario_id, grupo_id, request.form['nome'], request.form['descricao'],request.form['admin'], request.form['ativo'])
+        g = dict_helper_obj(grupo)
+        return jsonify(grupo = g)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 401
     
-#    else:
-#        return render_template('form_cad_pais.html')
-    
-#Abre a página de edição de países    
-#@app.route('/paises/editar/<pais_id>', methods=('GET', 'POST'))
-#def pais_edit(pais_id):
-#    
+
 #    if request.method == 'POST':
         # Executa a alteração do país
 #        sql = select(Pais).where(Pais.pais_id == pais_id)
@@ -226,14 +219,7 @@ return make_response(
 #        result.sigla = request.form['sigla']        
 #       session.commit() 
 
-        # Volta para a página de países
-#        return redirect(url_for('paises'))
-#    else:
 
-        # Pesquisa pelo Id do pais
-#        sql = select(Pais).where(Pais.pais_id == pais_id)
-#        result = session.scalars(sql).one()
-#        return render_template('form_edt_pais.html',pais_id=pais_id, nome=result.nome, sigla=result.sigla )
     
 #Abre a página de estados
 
@@ -421,3 +407,14 @@ def agendamentos_edit(agendamento_id):
                                hospitais = hospitais, agendamento = agendamento )
 
 """
+
+"""
+return make_response( 
+    'Could not verify', 
+    401, 
+    {'WWW-Authenticate' : 'Basic realm ="Login required !!"'} 
+) 
+
+
+ return make_response(jsonify({'token' : token.decode('UTF-8')}), 201) 
+""" 
