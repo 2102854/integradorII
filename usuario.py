@@ -83,6 +83,36 @@ class Usuario (Base):
             # tratamento de erro desconhecido
             return Exception('Erro desconhecido')
 
+    # Retorna os dados do usuário informado
+    def get_usuario_id(usuario_id, id, permissao_pai: str=None):
+        """
+        Este método utiliza um conceito de permissão pai, quando invocado por uma outra classe.
+        Facilita para não ter que dar outras permissões para o usuário
+        Utiliza a permissão do método que a chamou
+        """
+        try:
+            # Verifica se o usuário pode ver o conteúdo da tabela grupos            
+            acesso_liberado = False
+            if permissao_pai:
+                acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, permissao_pai)
+            else:
+                acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Visualizar_Usuarios')
+            if not acesso_liberado:                
+                raise BusinessException('Usuário não possui permissão para visualização de dados de usuários')
+            
+            # Retorna o grupo selecionado
+            grupo = session.query(Usuario).where(Usuario.usuario_id == id).all()  
+            if not grupo:                
+                raise BusinessException('Usuário não encontrado')
+
+            return grupo 
+        except BusinessException as err:
+            raise Exception(err)
+        except Exception:
+            # tratamento de erro desconhecido
+            return Exception('Erro desconhecido') 
+
+
     def add_usuarios(usuario_id, primeiro_nome, sobrenome, senha, email):
         try:
             # Verifica se o usuário pode adicionar um novo usuario usuário

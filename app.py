@@ -26,13 +26,16 @@ from seguranca.business_exception import BusinessException
 from seguranca.autenticacao import Auth
 from seguranca.token import Token
 from seguranca.grupo import Grupo
+from seguranca.grupo_permissao import Grupo_Permissao
 
+##########################################################
+#                        Config App                      #
+# ######################################################## 
 
 # Configuração da aplicação
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 app.config['DEBUG'] = True
-
 
 # Cria um retorno de dicionário de uma lista de objetos para retorno json
 def dict_helper_list(objlist):
@@ -64,6 +67,10 @@ def format_real(value):
     v = str(value)
     v = v.replace(".", ",")
     return v
+
+##########################################################
+#                      Rotas Aplicação                   #
+# ######################################################## 
 
 #página inicial
 @app.route("/")
@@ -130,6 +137,10 @@ def index():
     return render_template('index.html', hospitais=num_hospitais, pacientes=num_pacientes, agendamentos=num_agendamentos,
                           lt_hospitais=lt_hospitais, lt_pacientes=lt_pacientes, lt_agendamentos=lt_agendamentos)
 
+##########################################################
+#                    Módulo Segurança                    #
+# ######################################################## 
+
 # Realiza a autenticação do usuário
 @app.route('/login', methods=['POST'])
 def login():    
@@ -149,18 +160,10 @@ def login():
             return make_response(jsonify({'token' : token}), 201)
         except Exception as err:
             return make_response('Dados incorretos', 401, {'WWW-Authenticate' : 'Basic realm =Dados incorretos'}) 
-        
-# Recupera todos os Países Cadastrados no Banco de Dados
-@app.route('/paises', methods=['GET'])
-@Auth.token_required
-def get_paises(usuario_id):
-    try:
-        paises = Pais.get_paises(usuario_id)
-        p = dict_helper_list(paises) 
-        return jsonify(paises = p)            
-    except Exception as err:
-        response = jsonify({'message err': f'{err}'})
-        return response, 401
+
+##########################################################
+#                     Módulo Usuários                    #
+# ######################################################## 
 
 # Recupera todos os Usuários Cadastrados no Banco de Dados
 @app.route('/usuarios', methods=['GET'])
@@ -173,7 +176,23 @@ def get_usuarios(usuario_id):
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 401
-    
+
+# Recupera os dados do Usuário
+@app.route('/usuarios/<int:id>', methods=['GET'])
+@Auth.token_required
+def get_usuario_id(usuario_id, id:int):
+    try:
+        usuario = Usuario.get_usuario_id(usuario_id, id)
+        u = dict_helper_list(usuario) 
+        return jsonify(usuario = u)            
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 401    
+
+##########################################################
+#                       Módulo Grupos                    #
+# ########################################################   
+
 # Recupera todos os Grupos Cadastrados no Banco de Dados
 @app.route('/grupos', methods=['GET'])
 @Auth.token_required
@@ -185,6 +204,18 @@ def get_grupos(usuario_id):
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 401
+
+# Recupera de um Grupo de Usuários
+@app.route('/grupos/<int:grupo_id>', methods=['GET'])
+@Auth.token_required
+def get_grupo_id(usuario_id: int, grupo_id: int):
+    try:
+        grupo = Grupo.get_grupo_id(usuario_id, grupo_id)
+        g = dict_helper_list(grupo) 
+        return jsonify(grupo = g)            
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 401    
 
 # Adiciona um Grupo no Banco de Dados
 @app.route('/grupos/add', methods=['POST'])
@@ -199,30 +230,52 @@ def add_grupo(usuario_id):
         return response, 401
 
 # Edita um Grupo já cadastrado no Banco de Dados
-@app.route('/grupos/update/<grupo_id>', methods=['POST'])
+@app.route('/grupos/update', methods=['POST'])
 @Auth.token_required
-def update_grupo(usuario_id, grupo_id):
+def update_grupo(usuario_id):
     try:
-        grupo = Grupo.update_grupo(usuario_id, grupo_id, request.form['nome'], request.form['descricao'],request.form['admin'], request.form['ativo'])
+        # Recupera o objeto passado como parametro
+        ugrupo = request.get_json()
+        grupo = Grupo.update_grupo(usuario_id, ugrupo)
         g = dict_helper_obj(grupo)
         return jsonify(grupo = g)
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 401
     
-
-#    if request.method == 'POST':
-        # Executa a alteração do país
-#        sql = select(Pais).where(Pais.pais_id == pais_id)
-#        result = session.scalars(sql).one()
-#        result.nome = request.form['nome']
-#        result.sigla = request.form['sigla']        
-#       session.commit() 
-
-
+# Recupera as permissões associadas a um Grupo de Usuários
+@app.route('/grupos/permissoes/<int:grupo_id>', methods=['GET'])
+@Auth.token_required
+def get_permissoes_do_grupo(usuario_id: int, grupo_id: int):
+    try:
+        grupo_permissoes = Grupo_Permissao.get_permissoes_do_grupo(usuario_id, grupo_id)
+        gp = dict_helper_list(grupo_permissoes) 
+        return jsonify(grupo_permissao = gp)            
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 401    
     
-#Abre a página de estados
+##########################################################
+#                       Módulo Países                    #
+# ########################################################  
+     
+# Recupera todos os Países Cadastrados no Banco de Dados
+@app.route('/paises', methods=['GET'])
+@Auth.token_required
+def get_paises(usuario_id):
+    try:
+        paises = Pais.get_paises(usuario_id)
+        p = dict_helper_list(paises) 
+        return jsonify(paises = p)            
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 401
 
+##########################################################
+#                      Módulo Estados                    #
+# ######################################################## 
+
+#Abre a página de estados
 @app.route("/estados")
 def estados():    
     nome = request.args.get('nome', default = '', type = str)
@@ -231,6 +284,10 @@ def estados():
     else:
         sql = session.query(Estado, Pais).filter(ilike_op(Estado.nome,f'%{nome}%')).join(Estado, Estado.pais_id == Pais.pais_id).all()
     return render_template('estados.html', results=sql)
+
+##########################################################
+#                      Módulo Cidades                    #
+# ######################################################## 
 
 """
 #Abre a página de cidades
@@ -254,14 +311,6 @@ def pacientes():
     #else:
     #sql = session.query(Paciente, Cidade).filter(ilike_op(Paciente.nome,f'%{nome}%')).join(Cidade, Paciente.cidade_id == Cidade.cidade_id).all()
     return render_template('pacientes.html', results=sql)
-
-#https://medium.com/@mhd0416/flask-sqlalchemy-object-to-json-84c515d3c11c
-# Retorna a lista de pacientes em formato json
-@app.route("/pacientes/lst")
-def getPacientes():
-    sql = session.query(Paciente).all()
-    p = dict_helper(sql) 
-    return jsonify(pacientes = p)
 
 #Abre a página de cadastro de pacientes
 @app.route('/pacientes/novo/', methods=('GET', 'POST'))

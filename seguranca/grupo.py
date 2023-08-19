@@ -56,13 +56,14 @@ class Grupo (Base):
             elif b == True or b == 'True' or b== '1':
                 return 1
 
-    # Retorna os grupos cadastrados
+    # Retorna todos os grupos cadastrados
     def get_grupos(usuario_id):
         try:
             # Verifica se o usuário pode ver o conteúdo da tabela grupos
             acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Visualizar_Grupos')
             if not acesso_liberado:                
                 raise BusinessException('Usuário não possui permissão para visualização da lista de grupos do sistema')
+            
             grupos = session.query(Grupo).all()  
 
             return grupos 
@@ -70,7 +71,36 @@ class Grupo (Base):
             raise Exception(err)
         except Exception:
             # tratamento de erro desconhecido
-            return Exception('Erro desconhecido')    
+            return Exception('Erro desconhecido')
+
+    # Retorna os grupos informado
+    def get_grupo_id(usuario_id, grupo_id, permissao_pai: str=None):
+        """
+        Este método utiliza um conceito de permissão pai, quando invocado por uma outra classe.
+        Facilita para não ter que dar outras permissões para o usuário
+        Utiliza a permissão do método que a chamou
+        """
+        try:
+            # Verifica se o usuário pode ver o conteúdo da tabela grupos            
+            acesso_liberado = False
+            if permissao_pai:
+                acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, permissao_pai)
+            else:
+                acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Visualizar_Grupos')
+            if not acesso_liberado:                
+                raise BusinessException('Usuário não possui permissão para visualização dos grupos do sistema')
+            
+            # Retorna o grupo selecionado
+            grupo = session.query(Grupo).where(Grupo.grupo_id == grupo_id).all()  
+            if not grupo:                
+                raise BusinessException('Grupo não encontrado')
+
+            return grupo 
+        except BusinessException as err:
+            raise Exception(err)
+        except Exception:
+            # tratamento de erro desconhecido
+            return Exception('Erro desconhecido')              
         
     def add_grupo(usuario_id, nome, descricao, admin, ativo):
         try:
@@ -113,43 +143,51 @@ class Grupo (Base):
             # tratamento de erro desconhecido
             return Exception('Erro desconhecido')    
 
-    def update_grupo(usuario_id, nome, descricao, admin, ativo):
+    # Atualiza um Grupo Existente - A Chamada se faz pelo objeto grupo
+    def update_grupo(usuario_id, ugrupo):
         try:
             # Verifica se o usuário pode adicionar um novo grupo ao sistema
             acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Editar_Grupo')
             if not acesso_liberado:                
                 raise BusinessException('Usuário não possui permissão para editar os dados de grupos')
             
+            print(ugrupo)
+
             # Verifica se os campos estão preenchidos
-            if nome == '' or  not nome:
+            if ugrupo['nome'] == '' or  not ugrupo['nome']:
                 raise BusinessException('Nome do grupo é obrigatório')
 
-            if descricao == '' or  not descricao:
+            if ugrupo['descricao'] == '' or  not ugrupo['descricao']:
                 raise BusinessException('Descrição do grupo é obrigatório')
 
-            admin = Grupo.check_bool_field(admin)
-            ativo = Grupo.check_bool_field(ativo)                        
+            ugrupo['admin'] = Grupo.check_bool_field(ugrupo['admin'])
+            ugrupo['ativo'] = Grupo.check_bool_field(ugrupo['ativo'])                        
                                  
             # Recupera os dados do grupo informado
-            sql = select(Grupo).where(Grupo.grupo_id == usuario_id)
+            sql = select(Grupo).where(Grupo.grupo_id == ugrupo['grupo_id'])
             grupo = session.scalars(sql).one()
             if not grupo:
-                raise BusinessException('Grupo informado não encontrado')
+                raise BusinessException('Grupo informado não encontrado')                
             
             # Verifica se o nome do grupo alterou, se sim, precisa checar se já existe um cadastrado no sistema
-            if grupo.nome != nome:
-                
-            """
-            novoGrupo = Grupo(
-                nome = nome,
-                descricao = descricao,
-                admin = int(admin),
-                ativo = int(ativo)
-            )
-            """
-            # Adiciona um novo usuário             
+            if grupo.nome != ugrupo['nome']:
+                rows = session.query(Grupo).where(
+                    and_(
+                        Grupo.nome == ugrupo['nome'],
+                        Grupo.grupo_id != ugrupo['descricao']
+                    )).count()
+                if rows > 0:
+                    raise BusinessException('Nome informado já cadastrado para outro grupo no banco de dados')
+
+            # Atualiza o objeto a ser alterado
+            grupo.nome = ugrupo['nome']
+            grupo.descricao = ugrupo['descricao']
+            grupo.admin = ugrupo['admin']
+            grupo.ativo = ugrupo['ativo']
+
+            # Comita as alterações no banco de dados            
             session.commit()
-            return novoGrupo
+            return grupo
         
         except BusinessException as err:
             raise Exception(err)
