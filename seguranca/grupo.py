@@ -102,7 +102,7 @@ class Grupo (Base):
             # tratamento de erro desconhecido
             return Exception('Erro desconhecido')              
         
-    def add_grupo(usuario_id, nome, descricao, admin, ativo):
+    def add_grupo(usuario_id, agrupo):
         try:
             # Verifica se o usuário pode adicionar um novo grupo ao sistema
             acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Adicionar_Grupo')
@@ -110,25 +110,25 @@ class Grupo (Base):
                 raise BusinessException('Usuário não possui permissão para adicionar novos grupos')
             
             # Verifica se os campos estão preenchidos
-            if nome == '' or  not nome:
+            if agrupo['nome'] == '' or  not agrupo['nome']:
                 raise BusinessException('Nome do grupo é obrigatório')
 
-            if descricao == '' or  not descricao:
-                raise BusinessException('Descrição do grupo é obrigatório') 
+            if agrupo['descricao'] == '' or  not agrupo['descricao']:
+                raise BusinessException('Descrição do grupo é obrigatório')
 
-            admin = Grupo.check_bool_field(admin)
-            ativo = Grupo.check_bool_field(ativo)
-                                 
+            agrupo['admin'] = Grupo.check_bool_field(agrupo['admin'])
+            agrupo['ativo'] = Grupo.check_bool_field(agrupo['ativo']) 
+                             
             # Verifica se já existe um grupo cadastrado no banco de dados
-            rows = session.query(Grupo).where(Grupo.nome == nome).count()   
+            rows = session.query(Grupo).where(Grupo.nome == agrupo['nome']).count()   
             if rows > 0:
                 raise BusinessException('Grupo já cadastrado no banco de dados')
 
             novoGrupo = Grupo(
-                nome = nome,
-                descricao = descricao,
-                admin = int(admin),
-                ativo = int(ativo)
+                nome = agrupo['nome'],
+                descricao = agrupo['descricao'],
+                admin = agrupo['admin'],
+                ativo = agrupo['ativo']
             )
 
             # Adiciona um novo usuário
@@ -139,11 +139,10 @@ class Grupo (Base):
         except BusinessException as err:
             raise Exception(err)
         except Exception as e:
-            print(e)
             # tratamento de erro desconhecido
             return Exception('Erro desconhecido')    
 
-    # Atualiza um Grupo Existente - A Chamada se faz pelo objeto grupo
+    # Atualiza um Grupo Existente
     def update_grupo(usuario_id, ugrupo):
         try:
             # Verifica se o usuário pode adicionar um novo grupo ao sistema
@@ -151,8 +150,6 @@ class Grupo (Base):
             if not acesso_liberado:                
                 raise BusinessException('Usuário não possui permissão para editar os dados de grupos')
             
-            print(ugrupo)
-
             # Verifica se os campos estão preenchidos
             if ugrupo['nome'] == '' or  not ugrupo['nome']:
                 raise BusinessException('Nome do grupo é obrigatório')
@@ -169,12 +166,13 @@ class Grupo (Base):
             if not grupo:
                 raise BusinessException('Grupo informado não encontrado')                
             
-            # Verifica se o nome do grupo alterou, se sim, precisa checar se já existe um cadastrado no sistema
+            # Verifica se o nome do grupo foi alterado. 
+            # Se sim, precisa checar se já existe um cadastrado no sistema
             if grupo.nome != ugrupo['nome']:
                 rows = session.query(Grupo).where(
                     and_(
                         Grupo.nome == ugrupo['nome'],
-                        Grupo.grupo_id != ugrupo['descricao']
+                        Grupo.grupo_id != ugrupo['grupo_id']
                     )).count()
                 if rows > 0:
                     raise BusinessException('Nome informado já cadastrado para outro grupo no banco de dados')
@@ -192,6 +190,4 @@ class Grupo (Base):
         except BusinessException as err:
             raise Exception(err)
         except Exception as e:
-            print(e)
-            # tratamento de erro desconhecido
             return Exception('Erro desconhecido')  

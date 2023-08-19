@@ -10,17 +10,17 @@
 # Referencias
 import locale
 import json
-#from datetime import date, datetime, time
-#from babel.dates import format_date, format_datetime, format_time
-#https://babel.pocoo.org/en/latest/dates.html
-from models import Estado, Cidade, Veiculo, Hospital, Paciente, Motorista, Usuario, Tipo_Doenca, Tipo_Encaminhamento, Tipo_Remocao, Agendamento
-from pais import Pais
+from models import Hospital, Paciente, Agendamento
+
 from usuario import Usuario
 from flask import Flask, render_template, url_for, flash, redirect, request, jsonify, make_response
 from sqlalchemy import create_engine, func
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.operators import ilike_op
+
+from pais import Pais
+from estado import Estado
 
 from seguranca.business_exception import BusinessException
 from seguranca.autenticacao import Auth
@@ -49,9 +49,6 @@ def dict_helper_obj(obj):
 
 locale.setlocale( locale.LC_ALL,'pt_BR.UTF-8' )
 
-# Mapeia o banco de dados -- DEVE SER RETIRADO DAQUI
-engine = create_engine("sqlite:///integrador.db", echo=True)
-session = Session(engine)
 
 #Cria um filtro para o Jinja2 para formatar a data
 @app.template_filter()
@@ -222,7 +219,9 @@ def get_grupo_id(usuario_id: int, grupo_id: int):
 @Auth.token_required
 def add_grupo(usuario_id):
     try:
-        grupo = Grupo.add_grupo(usuario_id,request.form['nome'], request.form['descricao'],request.form['admin'], request.form['ativo'])
+        # Recupera o objeto passado como parametro
+        agrupo = request.get_json()        
+        grupo = Grupo.add_grupo(usuario_id, agrupo)
         g = dict_helper_obj(grupo)
         return jsonify(grupo = g)
     except Exception as err:
@@ -254,7 +253,7 @@ def get_permissoes_do_grupo(usuario_id: int, grupo_id: int):
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 401    
-    
+        
 ##########################################################
 #                       Módulo Países                    #
 # ########################################################  
@@ -271,19 +270,73 @@ def get_paises(usuario_id):
         response = jsonify({'message err': f'{err}'})
         return response, 401
 
+# Recupera o País pelo id
+@app.route('/paises/<int:pais_id>', methods=['GET'])
+@Auth.token_required
+def get_pais_id(usuario_id: int, pais_id: int):
+    try:
+        pais = Pais.get_pais_id(usuario_id, pais_id)
+        p = dict_helper_list(pais) 
+        return jsonify(pais = p)            
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 401      
+
+# Adiciona um Pais no Banco de Dados
+@app.route('/paises/add', methods=['POST'])
+@Auth.token_required
+def add_pais(usuario_id):
+    try:
+        # Recupera o objeto passado como parametro
+        apais = request.get_json()        
+        pais = Pais.add_pais(usuario_id, apais)
+        p = dict_helper_obj(pais)
+        return jsonify(pais = p)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 401
+
+# Edita um Pais já cadastrado no Banco de Dados
+@app.route('/paises/update', methods=['POST'])
+@Auth.token_required
+def update_pais(usuario_id):
+    try:
+        # Recupera o objeto passado como parametro
+        upais = request.get_json()
+        pais = Pais.update_pais(usuario_id, upais)
+        p = dict_helper_obj(pais)
+        return jsonify(pais = p)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 401
+
 ##########################################################
 #                      Módulo Estados                    #
 # ######################################################## 
 
 #Abre a página de estados
 @app.route("/estados")
-def estados():    
-    nome = request.args.get('nome', default = '', type = str)
-    if nome == '':    
-        sql = session.query(Estado, Pais).join(Estado, Estado.pais_id == Pais.pais_id).all()        
-    else:
-        sql = session.query(Estado, Pais).filter(ilike_op(Estado.nome,f'%{nome}%')).join(Estado, Estado.pais_id == Pais.pais_id).all()
-    return render_template('estados.html', results=sql)
+@Auth.token_required
+def get_estados(usuario_id):
+    try:
+        estados = Estado.get_estados(usuario_id)
+        e = dict_helper_list(estados) 
+        return jsonify(estados = e)            
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 401
+
+# Recupera o estado pelo id
+@app.route('/estados/<int:estado_id>', methods=['GET'])
+@Auth.token_required
+def get_estado_id(usuario_id: int, estado_id: int):
+    try:
+        estado = Estado.get_estado_id(usuario_id, estado_id)
+        e = dict_helper_list(estado) 
+        return jsonify(estado = e)            
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 401          
 
 ##########################################################
 #                      Módulo Cidades                    #
@@ -456,14 +509,3 @@ def agendamentos_edit(agendamento_id):
                                hospitais = hospitais, agendamento = agendamento )
 
 """
-
-"""
-return make_response( 
-    'Could not verify', 
-    401, 
-    {'WWW-Authenticate' : 'Basic realm ="Login required !!"'} 
-) 
-
-
- return make_response(jsonify({'token' : token.decode('UTF-8')}), 201) 
-""" 
