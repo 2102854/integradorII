@@ -6,7 +6,7 @@
 # Cada tabela do bd deverá ter sua própria Classe (arquivo.py)
 # Verificar a necessidade de criar classes separadas nos casos de herança (especialização ou generalização)
 
-
+from config import parameters
 # Referencias
 import locale
 import json
@@ -21,12 +21,14 @@ from sqlalchemy.sql.operators import ilike_op
 
 from pais import Pais
 from estado import Estado
+from cidade import Cidade
 
 from seguranca.business_exception import BusinessException
 from seguranca.autenticacao import Auth
 from seguranca.token import Token
 from seguranca.grupo import Grupo
 from seguranca.grupo_permissao import Grupo_Permissao
+
 
 ##########################################################
 #                        Config App                      #
@@ -36,6 +38,10 @@ from seguranca.grupo_permissao import Grupo_Permissao
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 app.config['DEBUG'] = True
+
+# Mapeia o banco de dados
+engine = create_engine(parameters['SQLALCHEMY_DATABASE_URI'], echo=True)
+session = Session(engine)
 
 # Cria um retorno de dicionário de uma lista de objetos para retorno json
 def dict_helper_list(objlist):
@@ -341,6 +347,43 @@ def get_estado_id(usuario_id: int, estado_id: int):
 ##########################################################
 #                      Módulo Cidades                    #
 # ######################################################## 
+#Abre a página de cidades
+@app.route("/cidades")
+@Auth.token_required
+def get_cidades(usuario_id: int):
+    try:
+        cidades = Cidade.get_cidades(usuario_id)
+        c = dict_helper_list(cidades)
+        return jsonify(cidades = c)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 404
+
+# Recupera a cidade pelo id
+@app.route('/cidades/<int:cidade_id>', methods=['GET'])
+@Auth.token_required
+def get_cidade_id(usuario_id: int, cidade_id: int):
+    try:
+        cidade = Cidade.get_cidade_id(usuario_id, cidade_id)
+        c = dict_helper_list(cidade)
+        return jsonify(cidade = c)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 404
+
+# Adiciona uma Cidade no Banco de Dados
+@app.route('/cidades/add', methods=['POST'])
+@Auth.token_required
+def add_cidade(usuario_id: int):
+    try:
+        # Recupera o objeto passado como parametro
+        acidade = request.get_json()
+        cidade = Cidade.add_cidade(usuario_id, acidade)
+        c = dict_helper_obj(cidade)
+        return jsonify(cidade = c)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 404 
 
 """
 #Abre a página de cidades
