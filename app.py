@@ -153,14 +153,14 @@ def login():
         try: 
             token = request.headers['x-access-token'] 
             Token.valida_token(token)
-            return make_response(jsonify({'token' : token.decode('UTF-8')}), 201)
+            return make_response(jsonify({'token' : token.decode('UTF-8')}), 200)
         except Exception as err:
             return make_response('Não foi possível verificar', 401, {'WWW-Authenticate' : 'Basic realm =Token inválido'})  
     else:
         try:
             # Executa a validação dos dados informados
             authorization = Auth.login(request.form['email'], request.form['senha'])
-            return make_response(jsonify({'authorization' : authorization}), 201)
+            return make_response(jsonify({'authorization' : authorization}), 200)
         except Exception as err:
             return make_response('Dados incorretos', 401, {'WWW-Authenticate' : 'Basic realm =Dados incorretos'}) 
 
