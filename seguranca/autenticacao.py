@@ -6,6 +6,7 @@ from werkzeug.security import check_password_hash
 from usuario import Usuario
 from seguranca.business_exception import BusinessException
 from seguranca.token import Token
+from seguranca.usuario_permissao import Usuario_Permissao
 
 class Auth(): 
     def token_required(f): 
@@ -59,8 +60,20 @@ class Auth():
             
             # Gera o Token de Autenticação
             token = Token.add_token(usuario.usuario_id, usuario.chave_publica)
+            
+            # Recupera as permissões do usuário
+            permissoes = []           
+            results = Usuario.get_permissoes_usuario(usuario.usuario_id)            
+            for r in results: 
+                permissoes.append(r[0])
+            
+            authorization = {
+                "token": token,
+                "nome" : usuario.primeiro_nome + ' ' + usuario.sobrenome,
+                "permissoes": permissoes             
+            }
 
-            return token 
+            return authorization 
 
         except Exception:
             return make_response('Não foi possível verificar', 401, {'WWW-Authenticate' : 'Basic realm =Erro desconhecido'})

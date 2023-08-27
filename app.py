@@ -12,7 +12,6 @@ import locale
 import json
 from models import Hospital, Paciente, Agendamento
 
-from usuario import Usuario
 from flask import Flask, render_template, url_for, flash, redirect, request, jsonify, make_response
 from sqlalchemy import create_engine, func
 from sqlalchemy import select
@@ -22,6 +21,7 @@ from sqlalchemy.sql.operators import ilike_op
 from pais import Pais
 from estado import Estado
 from cidade import Cidade
+from usuario import Usuario
 
 from seguranca.business_exception import BusinessException
 from seguranca.autenticacao import Auth
@@ -159,8 +159,8 @@ def login():
     else:
         try:
             # Executa a validação dos dados informados
-            token = Auth.login(request.form['email'], request.form['senha'])
-            return make_response(jsonify({'token' : token}), 201)
+            authorization = Auth.login(request.form['email'], request.form['senha'])
+            return make_response(jsonify({'authorization' : authorization}), 201)
         except Exception as err:
             return make_response('Dados incorretos', 401, {'WWW-Authenticate' : 'Basic realm =Dados incorretos'}) 
 

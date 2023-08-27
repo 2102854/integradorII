@@ -10,6 +10,7 @@ from sqlalchemy.sql.operators import ilike_op
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from seguranca.pemissoes import Permissao
+from seguranca.usuario_permissao import Usuario_Permissao
 from seguranca.business_exception import BusinessException
 import uuid
 import re 
@@ -197,3 +198,12 @@ class Usuario (Base):
     # Exemplo para criptografia de senha
     # usuario.senha = generate_password_hash(usuario.senha)
     # v = check_password_hash(usuario.senha, '123456')
+
+    # Retorna as permissões do usuário
+    def get_permissoes_usuario(usuario_id):
+
+        permissoes = session.query(Permissao.permissao)\
+            .join(Usuario_Permissao, Permissao.permissao_id == Usuario_Permissao.permissao_id)\
+            .where(Usuario_Permissao.usuario_id == usuario_id)\
+            .order_by(Permissao.permissao).all()
+        return permissoes    
