@@ -13,6 +13,8 @@ import json
 from models import Hospital, Paciente, Agendamento
 
 from flask import Flask, render_template, url_for, flash, redirect, request, jsonify, make_response
+from flask_cors import CORS # Ativa chamadas cors
+
 from sqlalchemy import create_engine, func
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -38,6 +40,9 @@ from seguranca.grupo_permissao import Grupo_Permissao
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 app.config['DEBUG'] = True
+
+# Habilita chamadas cors
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # Mapeia o banco de dados
 engine = create_engine(parameters['SQLALCHEMY_DATABASE_URI'], echo=True)
@@ -145,9 +150,10 @@ def index():
 # ######################################################## 
 
 # Realiza a autenticação do usuário
-@app.route('/login', methods=['POST'])
+@app.route('/api/login', methods=['POST'])
 def login():    
     # Verifica se existe um token na chamada
+    print(request.headers['Content-Type'])
     token = None
     if 'x-access-token' in request.headers:
         try: 
@@ -157,9 +163,15 @@ def login():
         except Exception as err:
             return make_response('Não foi possível verificar', 401, {'WWW-Authenticate' : 'Basic realm =Token inválido'})  
     else:
-        try:
-            # Executa a validação dos dados informados
-            authorization = Auth.login(request.form['email'], request.form['senha'])
+        try:            
+            print(request.headers['Content-Type']) #multipart/form-data
+            if request.headers['Content-Type'] == 'application/json':
+                # Executa a validação dos dados informados via json request
+                json_request = request.get_json()                 
+                authorization = Auth.login(json_request['email'], json_request['senha'])
+            else:    
+                # Executa a validação dos dados informados via body form
+                authorization = Auth.login(request.form['email'], request.form['senha'])
             return make_response(jsonify({'authorization' : authorization}), 200)
         except Exception as err:
             return make_response('Dados incorretos', 401, {'WWW-Authenticate' : 'Basic realm =Dados incorretos'}) 
@@ -169,7 +181,7 @@ def login():
 # ######################################################## 
 
 # Recupera todos os Usuários Cadastrados no Banco de Dados
-@app.route('/usuarios', methods=['GET'])
+@app.route('/api/usuarios', methods=['GET'])
 @Auth.token_required
 def get_usuarios(usuario_id):
     try:
@@ -181,7 +193,7 @@ def get_usuarios(usuario_id):
         return response, 401
 
 # Recupera os dados do Usuário
-@app.route('/usuarios/<int:id>', methods=['GET'])
+@app.route('/api/usuarios/<int:id>', methods=['GET'])
 @Auth.token_required
 def get_usuario_id(usuario_id, id:int):
     try:
