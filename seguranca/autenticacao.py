@@ -59,7 +59,7 @@ class Auth():
                 return make_response('Não foi possível verificar', 401, {'WWW-Authenticate' : 'Basic realm =E-mail ou Senha não é válido'})
             
             # Gera o Token de Autenticação
-            token = Token.add_token(usuario.usuario_id, usuario.chave_publica)
+            token, session_key = Token.add_token(usuario.usuario_id, usuario.chave_publica)
             
             # Recupera as permissões do usuário
             permissoes = []           
@@ -70,7 +70,8 @@ class Auth():
             authorization = {
                 "token": token,
                 "nome" : usuario.primeiro_nome + ' ' + usuario.sobrenome,
-                "permissoes": permissoes             
+                "permissoes": permissoes,
+                "session_key": session_key             
             }
 
             return authorization 

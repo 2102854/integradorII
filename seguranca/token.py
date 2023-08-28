@@ -8,8 +8,11 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.sqlite import (BLOB, BOOLEAN, CHAR, DATE, DATETIME, DECIMAL, FLOAT, INTEGER, NUMERIC, JSON, SMALLINT, TEXT, TIME, TIMESTAMP, VARCHAR)
 from sqlalchemy import create_engine, select, and_ , or_, update
 from sqlalchemy.orm import Session
+from typing import Callable
+from cuid2 import cuid_wrapper
 
 Base = declarative_base()
+cuid_generator: Callable[[], str] = cuid_wrapper()
 
 # Mapeia o banco de dados
 engine = create_engine(parameters['SQLALCHEMY_DATABASE_URI'], echo=True)
@@ -21,22 +24,24 @@ class Token (Base):
     token_id = Column(INTEGER, primary_key=True)
     data_criacao = Column(DATETIME, nullable=False)
     data_expiracao =  Column(DATETIME, nullable=False)
-    token = Column(TEXT(250), nullable=False)
-    usuario_id = Column(TEXT(128), nullable=False)
-    chave_publica = Column(TEXT(100), nullable=False)
+    token = Column(VARCHAR(250), nullable=False)
+    usuario_id = Column(VARCHAR(128), nullable=False)
+    chave_publica = Column(VARCHAR(100), nullable=False)
     expirado = Column(BOOLEAN, nullable=False, default=False)
+    session_key = Column(VARCHAR(4000), nullable=False)
 
     def __repr__(self) -> str:
         return f"Token(token_id={self.token_id!r},data_criacao={self.data_criacao!r},data_expiracao={self.data_expiracao!r},token={self.token!r},\
             usuario_id={self.usuario_id!r},chave_publica={self.chave_publica!r},expirado={self.expirado!r})" 
     
-    def __init__(self, data_criacao, data_expiracao, token, usuario_id, chave_publica, expirado):
+    def __init__(self, data_criacao, data_expiracao, token, usuario_id, chave_publica, expirado, session_key):
         self.data_criacao = data_criacao
         self.data_expiracao = data_expiracao
         self.token = token
         self.usuario_id = usuario_id
         self.chave_publica = chave_publica
         self.expirado = expirado
+        self.session_key = session_key
     
     # Retorna o resultado da Classe em formato json
     def obj_to_dict(self):  
@@ -71,12 +76,15 @@ class Token (Base):
         dt_criacao = datetime.now(pytz.timezone(parameters['TIMEZONE']))
         dt_expiracao = datetime.now(pytz.timezone(parameters['TIMEZONE'])) + timedelta(minutes = parameters['LOGOUT_MINUTES'])        
         
-        token = Token(dt_criacao, dt_expiracao, n_token, usuario_id, chave_publica, False)
+        #https://pypi.org/project/cuid2/#description
+        session_key: str = cuid_generator()
+        
+        token = Token(dt_criacao, dt_expiracao, n_token, usuario_id, chave_publica, False, session_key)
         
         session.add(token)        
         session.commit()  
         
-        return n_token 
+        return n_token, session_key 
     
     # Formata data para comparação
     def formata_data(d):
