@@ -164,16 +164,24 @@ def login():
         except Exception as err:
             return make_response('Não foi possível verificar', 401, {'WWW-Authenticate' : 'Basic realm =Token inválido'})  
     else:
-        try:            
-            #print(request.headers['Content-Type']) #multipart/form-data
+        try:
+            success: bool = False
+            msg: str = None
+                    
             if request.headers['Content-Type'] == 'application/json':
                 # Executa a validação dos dados informados via json request
                 json_request = request.get_json()                 
-                authorization = Auth.login(json_request['email'], json_request['senha'])
+                success, msg, authorization = Auth.login(json_request['email'], json_request['senha'])
             else:    
                 # Executa a validação dos dados informados via body form
-                authorization = Auth.login(request.form['email'], request.form['senha'])
-            return make_response(authorization, 200)
+                success, msg, authorization = Auth.login(request.form['email'], request.form['senha'])
+            
+            if success:
+                return make_response(authorization, 200)
+            else:
+                response = jsonify({'message err': f'{msg}'})
+                return response, 401                
+                
         except Exception as err:
             return make_response('Dados incorretos', 401, {'WWW-Authenticate' : 'Basic realm =Dados incorretos'}) 
 

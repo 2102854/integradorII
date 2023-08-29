@@ -41,22 +41,25 @@ class Auth():
         return decorated
 
     def login(email, senha): 
+        success: bool = False
+        msg: str = 'E-mail ou Senha não é válido'
+        authorization = None
         try:           
             # Verifica se as informações foram passadas corretamente para executar o login
             if not email or not senha:                 
-                return make_response('Não foi possível verificar', 401, {'WWW-Authenticate' : 'Basic realm =E-mail ou Senha não é válido'})
-        
+                #return make_response('Não foi possível verificar', 401, {'WWW-Authenticate' : 'Basic realm =E-mail ou Senha não é válido'})
+                return success, msg
             # Valida o e-mail informado    
             if not Usuario.email_eh_valido(email):        
-                return make_response('Não foi possível verificar', 401, {'WWW-Authenticate' : 'Basic realm =E-mail não é Válido'})
+                return success, msg, authorization
             
             usuario = Usuario.get_usuario_by_email(email)             
             if not usuario:
-                return make_response('Não foi possível verificar', 401, {'WWW-Authenticate' : 'Basic realm =E-mail ou Senha não é válido'}) 
+                return success, msg, authorization
             
             # Valida a senha do Usuário
             if not check_password_hash(usuario.senha, senha): 
-                return make_response('Não foi possível verificar', 401, {'WWW-Authenticate' : 'Basic realm =E-mail ou Senha não é válido'})
+                return success, msg, authorization
             
             # Gera o Token de Autenticação
             token, session_key = Token.add_token(usuario.usuario_id, usuario.chave_publica)
@@ -73,8 +76,10 @@ class Auth():
                 "permissoes": permissoes,
                 "session_key": session_key             
             }
-
-            return authorization 
+            success = True
+            msg = 'Login realizado com sucesso!'
+            return success, msg, authorization 
 
         except Exception:
-            return make_response('Não foi possível verificar', 401, {'WWW-Authenticate' : 'Basic realm =Erro desconhecido'})
+            msg = 'Erro desconhecido'
+            return success, msg, authorization 
