@@ -24,6 +24,7 @@ from pais import Pais
 from estado import Estado
 from cidade import Cidade
 from usuario import Usuario
+from hospital import Hospital
 
 from seguranca.business_exception import BusinessException
 from seguranca.autenticacao import Auth
@@ -397,6 +398,46 @@ def add_cidade(usuario_id: int):
         response = jsonify({'message err': f'{err}'})
         return response, 404 
 
+##########################################################
+#                      Módulo Hospitais                    #
+# ########################################################
+#Abre a página de hospitais
+@app.route("/hospitais")
+@Auth.token_required
+def get_hospitais(usuario_id: int):
+    try:
+        hospital = Hospital.get_hospitais(usuario_id)
+        e = dict_helper_list(hospital)
+        return jsonify(hospital = e)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 404
+
+# Recupera o hospital pelo id
+@app.route('/hospitais/<int:hospital_id>', methods=['GET'])
+@Auth.token_required
+def get_hospital_id(usuario_id: int, hospital_id: int):
+    try:
+        hospital = Hospital.get_hospital_id(usuario_id, hospital_id)
+        e = dict_helper_list(hospital)
+        return jsonify(hospital = e)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 404
+
+# Adiciona um Hospital no Banco de Dados
+@app.route('/hospitais/add', methods=['POST'])
+@Auth.token_required
+def add_hospital(usuario_id: int):
+    try:
+        # Recupera o objeto passado como parametro
+        ahospital = request.get_json()
+        hospital = Hospital.add_hospital(usuario_id, ahospital)
+        c = dict_helper_obj(hospital)
+        return jsonify(hospital = c)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 404
 """
 #Abre a página de cidades
 @app.route("/cidades")
