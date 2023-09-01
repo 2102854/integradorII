@@ -107,10 +107,14 @@ class Token (Base):
     # Valida o Token informado
     def valida_token(n_token):
         try:    
+            token = None
             # Recupera os dados do token do banco de dados
-            sql = select(Token).where(Token.token == n_token)
-            token = session.scalars(sql).one()
-
+            try:
+                sql = select(Token).where(Token.token == n_token)
+                token = session.scalars(sql).one()
+            except:
+                raise Exception('Token Inválido!')
+            
             # Se o token não existir
             if not token:
                 raise Exception('Token Inválido!')
@@ -133,4 +137,4 @@ class Token (Base):
             session.commit()  
                                 
         except Exception as err:
-            raise Exception(err)        
+            raise Exception(err) 

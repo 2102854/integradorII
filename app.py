@@ -184,6 +184,21 @@ def login():
                 
         except Exception as err:
             return make_response('Dados incorretos', 401, {'WWW-Authenticate' : 'Basic realm =Dados incorretos'}) 
+        
+# Verifica se o token permanece válido
+@app.route('/api/token_validate', methods=['GET','POST'])
+def tokenValidate():  
+    token = None
+    if 'x-access-token' in request.headers:
+        try: 
+            token = request.headers['x-access-token'] 
+            Token.valida_token(token)
+            response = jsonify({'token' : 'Válido'})
+            return response, 200   
+           
+        except Exception as err:
+            response = jsonify({'message err': f'{err}'})
+            return response, 401           
 
 ##########################################################
 #                     Módulo Usuários                    #
