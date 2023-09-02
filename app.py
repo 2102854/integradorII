@@ -316,7 +316,7 @@ def get_paises(usuario_id):
         return response, 401
 
 # Recupera o País pelo id
-@app.route('/paises/<int:pais_id>', methods=['GET'])
+@app.route('/api/paises/<int:pais_id>', methods=['GET'])
 @Auth.token_required
 def get_pais_id(usuario_id: int, pais_id: int):
     try:
@@ -328,7 +328,7 @@ def get_pais_id(usuario_id: int, pais_id: int):
         return response, 401      
 
 # Adiciona um Pais no Banco de Dados
-@app.route('/paises/add', methods=['POST'])
+@app.route('/api/paises/add', methods=['POST'])
 @Auth.token_required
 def add_pais(usuario_id):
     try:
@@ -342,7 +342,7 @@ def add_pais(usuario_id):
         return response, 401
 
 # Edita um Pais já cadastrado no Banco de Dados
-@app.route('/paises/update', methods=['POST'])
+@app.route('/api/paises/update', methods=['POST'])
 @Auth.token_required
 def update_pais(usuario_id):
     try:
@@ -360,7 +360,7 @@ def update_pais(usuario_id):
 # ######################################################## 
 
 #Abre a página de estados
-@app.route("/estados")
+@app.route("/api/estados")
 @Auth.token_required
 def get_estados(usuario_id):
     try:
@@ -372,7 +372,7 @@ def get_estados(usuario_id):
         return response, 401
 
 # Recupera o estado pelo id
-@app.route('/estados/<int:estado_id>', methods=['GET'])
+@app.route('/api/estados/<int:estado_id>', methods=['GET'])
 @Auth.token_required
 def get_estado_id(usuario_id: int, estado_id: int):
     try:
@@ -387,7 +387,7 @@ def get_estado_id(usuario_id: int, estado_id: int):
 #                      Módulo Cidades                    #
 # ######################################################## 
 #Abre a página de cidades
-@app.route("/cidades")
+@app.route("/api/cidades")
 @Auth.token_required
 def get_cidades(usuario_id: int):
     try:
@@ -399,7 +399,7 @@ def get_cidades(usuario_id: int):
         return response, 404
 
 # Recupera a cidade pelo id
-@app.route('/cidades/<int:cidade_id>', methods=['GET'])
+@app.route('/api/cidades/<int:cidade_id>', methods=['GET'])
 @Auth.token_required
 def get_cidade_id(usuario_id: int, cidade_id: int):
     try:
@@ -411,7 +411,7 @@ def get_cidade_id(usuario_id: int, cidade_id: int):
         return response, 404
 
 # Adiciona uma Cidade no Banco de Dados
-@app.route('/cidades/add', methods=['POST'])
+@app.route('/api/cidades/add', methods=['POST'])
 @Auth.token_required
 def add_cidade(usuario_id: int):
     try:
@@ -428,7 +428,7 @@ def add_cidade(usuario_id: int):
 #                      Módulo Hospitais                    #
 # ########################################################
 #Abre a página de hospitais
-@app.route("/hospitais")
+@app.route("/api/hospitais")
 @Auth.token_required
 def get_hospitais(usuario_id: int):
     try:
@@ -440,7 +440,7 @@ def get_hospitais(usuario_id: int):
         return response, 404
 
 # Recupera o hospital pelo id
-@app.route('/hospitais/<int:hospital_id>', methods=['GET'])
+@app.route('/api/hospitais/<int:hospital_id>', methods=['GET'])
 @Auth.token_required
 def get_hospital_id(usuario_id: int, hospital_id: int):
     try:
@@ -452,7 +452,7 @@ def get_hospital_id(usuario_id: int, hospital_id: int):
         return response, 404
 
 # Adiciona um Hospital no Banco de Dados
-@app.route('/hospitais/add', methods=['POST'])
+@app.route('/api/hospitais/add', methods=['POST'])
 @Auth.token_required
 def add_hospital(usuario_id: int):
     try:
@@ -469,7 +469,7 @@ def add_hospital(usuario_id: int):
 #                      Módulo Veículos                   #
 # ########################################################
 #Abre a página de veículos
-@app.route("/veiculos")
+@app.route("/api/veiculos")
 @Auth.token_required
 def get_veiculos(usuario_id: int):
     try:
@@ -481,7 +481,7 @@ def get_veiculos(usuario_id: int):
         return response, 404
 
 # Recupera o veículo pelo id
-@app.route('/veiculos/<int:veiculo_id>', methods=['GET'])
+@app.route('/api/veiculos/<int:veiculo_id>', methods=['GET'])
 @Auth.token_required
 def get_veiculo_id(usuario_id: int, veiculo_id: int):
     try:
@@ -493,7 +493,7 @@ def get_veiculo_id(usuario_id: int, veiculo_id: int):
         return response, 404
 
 # Adiciona um Veículo no Banco de Dados
-@app.route('/veiculos/add', methods=['POST'])
+@app.route('/api/veiculos/add', methods=['POST'])
 @Auth.token_required
 def add_veiculo(usuario_id: int):
     try:
@@ -507,7 +507,7 @@ def add_veiculo(usuario_id: int):
         return response, 404
 
 # Edita um Veículo já cadastrado no Banco de Dados
-@app.route('/veiculos/update', methods=['POST'])
+@app.route('/api/veiculos/update', methods=['POST'])
 @Auth.token_required
 def update_veiculo(usuario_id: int):
     try:
