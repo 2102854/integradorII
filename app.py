@@ -233,7 +233,7 @@ def get_usuario_id(usuario_id, id:int):
 # ########################################################   
 
 # Recupera todos os Grupos Cadastrados no Banco de Dados
-@app.route('/grupos', methods=['GET'])
+@app.route('/api/grupos', methods=['GET'])
 @Auth.token_required
 def get_grupos(usuario_id):
     try:
@@ -245,7 +245,7 @@ def get_grupos(usuario_id):
         return response, 401
 
 # Recupera de um Grupo de Usuários
-@app.route('/grupos/<int:grupo_id>', methods=['GET'])
+@app.route('/api/grupos/<int:grupo_id>', methods=['GET'])
 @Auth.token_required
 def get_grupo_id(usuario_id: int, grupo_id: int):
     try:
@@ -257,7 +257,7 @@ def get_grupo_id(usuario_id: int, grupo_id: int):
         return response, 401    
 
 # Adiciona um Grupo no Banco de Dados
-@app.route('/grupos/add', methods=['POST'])
+@app.route('/api/grupos/add', methods=['POST'])
 @Auth.token_required
 def add_grupo(usuario_id):
     try:
@@ -271,7 +271,7 @@ def add_grupo(usuario_id):
         return response, 401
 
 # Edita um Grupo já cadastrado no Banco de Dados
-@app.route('/grupos/update', methods=['POST'])
+@app.route('/api/grupos/update', methods=['POST'])
 @Auth.token_required
 def update_grupo(usuario_id):
     try:
@@ -285,7 +285,7 @@ def update_grupo(usuario_id):
         return response, 401
     
 # Recupera as permissões associadas a um Grupo de Usuários
-@app.route('/grupos/permissoes/<int:grupo_id>', methods=['GET'])
+@app.route('/api/grupos/permissoes/<int:grupo_id>', methods=['GET'])
 @Auth.token_required
 def get_permissoes_do_grupo(usuario_id: int, grupo_id: int):
     try:
@@ -301,13 +301,15 @@ def get_permissoes_do_grupo(usuario_id: int, grupo_id: int):
 # ########################################################  
      
 # Recupera todos os Países Cadastrados no Banco de Dados
-@app.route('/paises', methods=['GET'])
+@app.route('/api/paises', methods=['GET'])
 @Auth.token_required
 def get_paises(usuario_id):
     try:
         paises = Pais.get_paises(usuario_id)
         p = dict_helper_list(paises) 
-        return jsonify(paises = p)            
+        #return jsonify(paises = p) 
+        return make_response(p, 200)
+                    
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 401
