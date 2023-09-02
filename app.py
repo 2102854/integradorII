@@ -25,6 +25,7 @@ from estado import Estado
 from cidade import Cidade
 from usuario import Usuario
 from hospital import Hospital
+from veiculo import Veiculo
 
 from seguranca.business_exception import BusinessException
 from seguranca.autenticacao import Auth
@@ -463,6 +464,61 @@ def add_hospital(usuario_id: int):
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 404
+    
+##########################################################
+#                      Módulo Veículos                   #
+# ########################################################
+#Abre a página de veículos
+@app.route("/veiculos")
+@Auth.token_required
+def get_veiculos(usuario_id: int):
+    try:
+        veiculo = Veiculo.get_veiculos(usuario_id)
+        e = dict_helper_list(veiculo)
+        return jsonify(veiculo = e)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 404
+
+# Recupera o veículo pelo id
+@app.route('/veiculos/<int:veiculo_id>', methods=['GET'])
+@Auth.token_required
+def get_veiculo_id(usuario_id: int, veiculo_id: int):
+    try:
+        veiculo = Veiculo.get_veiculo_id(usuario_id, veiculo_id)
+        e = dict_helper_list(veiculo)
+        return jsonify(veiculo = e)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 404
+
+# Adiciona um Veículo no Banco de Dados
+@app.route('/veiculos/add', methods=['POST'])
+@Auth.token_required
+def add_veiculo(usuario_id: int):
+    try:
+        # Recupera o objeto passado como parametro
+        aveiculo = request.get_json()
+        veiculo = Veiculo.add_veiculo(usuario_id, aveiculo)
+        c = dict_helper_obj(veiculo)
+        return jsonify(veiculo = c)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 404
+
+# Edita um Veículo já cadastrado no Banco de Dados
+@app.route('/veiculos/update', methods=['POST'])
+@Auth.token_required
+def update_veiculo(usuario_id: int):
+    try:
+        # Recupera o objeto passado como parametro
+        uveiculo = request.get_json()
+        veiculo = Veiculo.update_veiculo(usuario_id, uveiculo)
+        p = dict_helper_obj(veiculo)
+        return jsonify(veiculo = p)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 401    
 """
 #Abre a página de cidades
 @app.route("/cidades")
