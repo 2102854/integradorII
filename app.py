@@ -330,7 +330,7 @@ def get_pais_id(usuario_id: int, pais_id: int):
 # Adiciona um Pais no Banco de Dados
 @app.route('/api/paises/add', methods=['POST'])
 @Auth.token_required
-def add_pais(usuario_id):
+def add_pais(usuario_id: int):
     try:
         # Recupera o objeto passado como parametro
         apais = request.get_json()        

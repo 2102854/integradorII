@@ -110,8 +110,8 @@ class Pais (Base):
                 raise BusinessException('Pais já cadastrado no banco de dados com esta sigla')            
 
             novoPais = Pais(
-                nome = apais['nome'],
-                descricao = apais['sigla']
+                nome = apais['nome'].upper(),
+                sigla = apais['sigla'].upper()
             )
 
             # Adiciona um novo país
