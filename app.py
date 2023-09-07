@@ -26,6 +26,7 @@ from cidade import Cidade
 from usuario import Usuario
 from hospital import Hospital
 from veiculo import Veiculo
+from paciente import Paciente
 
 from seguranca.business_exception import BusinessException
 from seguranca.autenticacao import Auth
@@ -321,11 +322,11 @@ def get_paises(usuario_id):
 def get_pais_id(usuario_id: int, pais_id: int):
     try:
         pais = Pais.get_pais_id(usuario_id, pais_id)
-        p = dict_helper_list(pais) 
-        return jsonify(pais = p)            
+        p = dict_helper_obj(pais) 
+        return make_response(p, 200)         
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
-        return response, 401      
+        return response, 401        
 
 # Adiciona um Pais no Banco de Dados
 @app.route('/api/paises/add', methods=['POST'])
@@ -342,13 +343,13 @@ def add_pais(usuario_id: int):
         return response, 401
 
 # Edita um Pais já cadastrado no Banco de Dados
-@app.route('/api/paises/update', methods=['POST'])
+@app.route('/api/paises/update/<int:pais_id>', methods=['PUT'])
 @Auth.token_required
-def update_pais(usuario_id):
+def update_pais(usuario_id: int, pais_id: int):
     try:
         # Recupera o objeto passado como parametro
         upais = request.get_json()
-        pais = Pais.update_pais(usuario_id, upais)
+        pais = Pais.update_pais(usuario_id, pais_id, upais)
         p = dict_helper_obj(pais)
         return jsonify(pais = p)
     except Exception as err:
@@ -366,7 +367,8 @@ def get_estados(usuario_id):
     try:
         estados = Estado.get_estados(usuario_id)
         e = dict_helper_list(estados) 
-        return jsonify(estados = e)            
+        return make_response(e, 200)      
+
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 401
@@ -519,6 +521,66 @@ def update_veiculo(usuario_id: int):
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 401    
+    
+##########################################################
+#                      Módulo Pacientes                  #
+# ########################################################
+#Abre a página de pacientes
+@app.route("/pacientes")
+##@Auth.token_required
+def get_pacientes():
+    try:
+        usuario_id = 1
+        paciente = Paciente.get_pacientes(usuario_id)
+        e = dict_helper_list(paciente)
+        return jsonify(paciente = e)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 404
+
+# Recupera o paciente pelo id
+@app.route('/pacientes/<int:paciente_id>', methods=['GET'])
+##@Auth.token_required
+def get_paciente_id(paciente_id: int):
+    try:
+        usuario_id = 1
+        paciente = Paciente.get_paciente_id(usuario_id, paciente_id)
+        e = dict_helper_list(paciente)
+        return jsonify(paciente = e)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 404
+
+# Adiciona um Veículo no Banco de Dados
+@app.route('/pacientes/add', methods=['POST'])
+##@Auth.token_required
+def add_paciente():
+    try:
+        usuario_id = 1
+        # Recupera o objeto passado como parametro
+        apaciente = request.get_json()
+        paciente = Paciente.add_paciente(usuario_id, apaciente)
+        c = dict_helper_obj(paciente)
+        return jsonify(paciente = c)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 404
+
+# Edita um Paciente já cadastrado no Banco de Dados
+@app.route('/pacientes/update', methods=['POST'])
+#@Auth.token_required
+def update_paciente():
+    try:
+        usuario_id = 1
+        # Recupera o objeto passado como parametro
+        upaciente = request.get_json()
+        paciente = Paciente.update_paciente(usuario_id, upaciente)
+        p = dict_helper_obj(paciente)
+        return jsonify(paciente = p)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 401
+    
 """
 #Abre a página de cidades
 @app.route("/cidades")

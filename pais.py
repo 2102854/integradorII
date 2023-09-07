@@ -75,7 +75,10 @@ class Pais (Base):
                 raise BusinessException('Usuário não Possui permissão para visualização dos país informado')
             
             # Retorna o grupo selecionado
-            pais = session.query(Pais).where(Pais.pais_id == pais_id).all()  
+            #pais = session.query(Pais).where(Pais.pais_id == pais_id).all()  
+            sql = select(Pais).where(Pais.pais_id == pais_id)
+            pais = session.scalars(sql).one()            
+            
             if not pais:                
                 raise BusinessException('Pais não encontrado')
 
@@ -126,12 +129,16 @@ class Pais (Base):
             return Exception('Erro desconhecido')                  
 
     # Atualiza um Pais Existente
-    def update_pais(usuario_id, upais):
+    def update_pais(usuario_id: int, pais_id: int, upais):
         try:
             # Verifica se o usuário pode adicionar um novo pais ao sistema
             acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Editar_Pais')
             if not acesso_liberado:                
-                raise BusinessException('Usuário não possui permissão para editar os dados do pais')
+                raise BusinessException('Usuário não possui permissão para editar os dados do pais')            
+            
+            # Verifica os códigos informados
+            if int(upais['pais_id']) != pais_id:
+                raise BusinessException('Erro na identificação do país')
             
             # Verifica se os campos estão preenchidos
             if upais['nome'] == '' or  not upais['nome']:
