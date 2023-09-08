@@ -14,7 +14,6 @@ Base = declarative_base()
 engine = create_engine(parameters['SQLALCHEMY_DATABASE_URI'], echo=True)
 session = Session(engine)
 
-
 class Veiculo(Base):
     # Identifica a tabela no Banco de Dados
     __tablename__ = "VEICULO"
@@ -92,7 +91,6 @@ class Veiculo(Base):
         except Exception:
             return Exception('Erro desconhecido')
 
-    #Adiciona um novo veículo
     def add_veiculo(usuario_id, aveiculo):
         try:
             # Verifica se o usuário pode adicionar um novo veículo ao sistema
@@ -171,7 +169,7 @@ class Veiculo(Base):
             if veiculo.placa != uveiculo['placa']:
                 rows = session.query(Veiculo).where(
                     and_(
-                        Veiculo.placa == uveiculo['[placa]']
+                        Veiculo.placa == uveiculo['placa']
                     )).count()
                 if rows > 0:
                     raise BusinessException('Placa informada já cadastrada para outro veículo')

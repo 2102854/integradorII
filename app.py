@@ -27,6 +27,7 @@ from usuario import Usuario
 from hospital import Hospital
 from veiculo import Veiculo
 from paciente import Paciente
+from motorista import Motorista
 
 from seguranca.business_exception import BusinessException
 from seguranca.autenticacao import Auth
@@ -379,11 +380,40 @@ def get_estados(usuario_id):
 def get_estado_id(usuario_id: int, estado_id: int):
     try:
         estado = Estado.get_estado_id(usuario_id, estado_id)
-        e = dict_helper_list(estado) 
-        return jsonify(estado = e)            
+        e = dict_helper_obj(estado) 
+        return make_response(e, 200)      
+               
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
-        return response, 401          
+        return response, 401       
+
+# Adiciona um novo estado no Banco de Dados
+@app.route('/api/estados/add', methods=['POST'])
+@Auth.token_required
+def add_estados(usuario_id: int):
+    try:
+        # Recupera o objeto passado como parametro
+        aestado = request.get_json()        
+        estado = Estado.add_estado(usuario_id, aestado)
+        e = dict_helper_obj(estado)
+        return jsonify(estado = e)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 401     
+
+# Edita um Estado já cadastrado no Banco de Dados
+@app.route('/api/estados/update/<int:estado_id>', methods=['PUT'])
+@Auth.token_required
+def update_estado(usuario_id: int, estado_id: int):
+    try:
+        # Recupera o objeto passado como parametro
+        uestado = request.get_json()
+        estado = Estado.update_estado(usuario_id, estado_id, uestado)
+        e = dict_helper_obj(estado)
+        return jsonify(estado = e)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 401      
 
 ##########################################################
 #                      Módulo Cidades                    #
@@ -580,6 +610,66 @@ def update_paciente():
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 401
+
+##########################################################
+#                     Módulo Motoristas                  #
+# ########################################################
+#Abre a página de motoristas
+@app.route("/motoristas")
+##@Auth.token_required
+def get_motoristas():
+    try:
+        usuario_id = 1
+        motorista = Motorista.get_motoristas(usuario_id)
+        e = dict_helper_list(motorista)
+        return jsonify(motorista = e)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 404
+
+# Recupera o motorista pelo id
+@app.route('/motoristas/<int:motorista_id>', methods=['GET'])
+##@Auth.token_required
+def get_motorista_id(motorista_id: int):
+    try:
+        usuario_id = 1
+        motorista = Motorista.get_motorista_id(usuario_id, motorista_id)
+        e = dict_helper_list(motorista)
+        return jsonify(motorista = e)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 404
+
+# Adiciona um Motorista no Banco de Dados
+@app.route('/motoristas/add', methods=['POST'])
+##@Auth.token_required
+def add_motorista():
+    try:
+        usuario_id = 1
+        # Recupera o objeto passado como parametro
+        amotorista = request.get_json()
+        motorista = Motorista.add_motorista(usuario_id, amotorista)
+        c = dict_helper_obj(motorista)
+        return jsonify(motorista = c)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 404
+
+# Edita um Motorista já cadastrado no Banco de Dados
+@app.route('/motoristas/update', methods=['POST'])
+#@Auth.token_required
+def update_motorista():
+    try:
+        usuario_id = 1
+        # Recupera o objeto passado como parametro
+        umotorista = request.get_json()
+        motorista = Motorista.update_motorista(usuario_id, umotorista)
+        p = dict_helper_obj(motorista)
+        return jsonify(motorista = p)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 401
+
     
 """
 #Abre a página de cidades

@@ -33,7 +33,7 @@ class Estado (Base):
     
     # Método de Inicialização
     def __init__(self, pais_id, nome, sigla):
-        self.pais_id, pais_id
+        self.pais_id = pais_id
         self.nome = nome 
         self.sigla = sigla
 
@@ -79,9 +79,10 @@ class Estado (Base):
                 raise BusinessException('Usuário não Possui permissão para visualização do estado informado')
             
             # Retorna o grupo selecionado
-            estado = session.query(Estado).where(Estado.estado_id == estado_id).all()  
+            sql = select(Estado).where(Estado.estado_id == estado_id)
+            estado = session.scalars(sql).one() 
             if not estado:                
-                raise BusinessException('Estado não encontrado')
+                raise BusinessException('Estado não encontrado')                
 
             return estado 
         
@@ -128,11 +129,11 @@ class Estado (Base):
                 )).count()   
             if rows > 0:
                 raise BusinessException('Estado já cadastrado com este nome')            
-
+            
             novoEstado = Estado(
-                pais_id = aestado['pais_id'],
+                pais_id = int(aestado['pais_id']),
                 nome = aestado['nome'],
-                descricao = aestado['sigla']
+                sigla = aestado['sigla']
             )
 
             # Adiciona um novo Estado
@@ -146,12 +147,16 @@ class Estado (Base):
             return Exception('Erro desconhecido')                  
 
     # Atualiza um Estado Existente
-    def update_estado(usuario_id, uestado):
+    def update_estado(usuario_id, estado_id, uestado):
         try:
             # Verifica se o usuário pode adicionar um novo pais ao sistema
             acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Atualizar_Estados')
             if not acesso_liberado:                
                 raise BusinessException('Usuário não possui permissão para editar os dados do estado')
+
+            # Verifica os códigos informados
+            if int(uestado['estado_id']) != estado_id:
+                raise BusinessException('Erro na identificação do estado')            
             
             # Verifica se os campos estão preenchidos
             if uestado['pais_id'] == '' or  not uestado['pais_id']:
