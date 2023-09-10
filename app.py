@@ -196,7 +196,7 @@ def tokenValidate():
         try: 
             token = request.headers['x-access-token'] 
             Token.valida_token(token)
-            response = jsonify({'token' : 'Válido'})
+            response = jsonify({'token' : 'VALIDO'})
             return response, 200   
            
         except Exception as err:

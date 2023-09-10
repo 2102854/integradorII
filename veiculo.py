@@ -121,12 +121,12 @@ class Veiculo(Base):
                 raise BusinessException('Veículo já cadastrado com esta placa')
 
             novoVeiculo = Veiculo(
-                modelo = aveiculo['modelo'],
-                placa = aveiculo['placa'],
-                capacidade = aveiculo['capacidade'],
-                media_consumo = aveiculo['media_consumo']
+                modelo = aveiculo['modelo'].upper().strip(),
+                placa = aveiculo['placa'].upper().strip(),
+                capacidade = aveiculo['capacidade'].strip(),
+                media_consumo = aveiculo['media_consumo'].strip()
             )
-
+            
             # Adiciona um novo Veículo
             session.add(novoVeiculo)
             session.commit()

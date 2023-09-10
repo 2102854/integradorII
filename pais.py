@@ -113,8 +113,8 @@ class Pais (Base):
                 raise BusinessException('Pais já cadastrado no banco de dados com esta sigla')            
 
             novoPais = Pais(
-                nome = apais['nome'].upper(),
-                sigla = apais['sigla'].upper()
+                nome = apais['nome'].upper().strip(),
+                sigla = apais['sigla'].upper().strip()
             )
 
             # Adiciona um novo país
@@ -174,8 +174,8 @@ class Pais (Base):
                     raise BusinessException('Sigla informada já cadastrada para outro pais no banco de dados')                
 
             # Atualiza o objeto a ser alterado
-            pais.nome = upais['nome']
-            pais.sigla = upais['sigla']
+            pais.nome = upais['nome'].upper().strip()
+            pais.sigla = upais['sigla'].upper().strip()
 
             # Comita as alterações no banco de dados            
             session.commit()

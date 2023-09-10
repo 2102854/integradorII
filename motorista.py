@@ -116,9 +116,9 @@ class Motorista(Base):
                 raise BusinessException('Motorista já cadastrado com esta CNH')
 
             novoMotorista = Motorista(
-                nome = amotorista['nome'],
-                numero_habilitacao = amotorista['numero_habilitacao'],
-                carga_horaria = amotorista['carga_horaria']
+                nome = amotorista['nome'].upper().strip(),
+                numero_habilitacao = amotorista['numero_habilitacao'].strip(),
+                carga_horaria = amotorista['carga_horaria'].strip()
             )
 
             # Adiciona um novo Motorista
@@ -168,9 +168,9 @@ class Motorista(Base):
                     raise BusinessException('Número de CNH informada já cadastrada para outro motorista')
 
             # Atualiza o objeto a ser alterado
-            motorista.nome = umotorista['nome']
-            motorista.numero_habilitacao = umotorista['numero_habilitacao']
-            motorista.carga_horaria = umotorista['carga_horaria']
+            motorista.nome = umotorista['nome'].upper().strip()
+            motorista.numero_habilitacao = umotorista['numero_habilitacao'].strip()
+            motorista.carga_horaria = umotorista['carga_horaria'].strip()
 
             # Comita as alterações no banco de dados
             session.commit()

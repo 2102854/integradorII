@@ -157,10 +157,10 @@ class Usuario (Base):
                     break
 
             novoUsuario = Usuario(
-                primeiro_nome = primeiro_nome,
-                sobrenome = sobrenome,
+                primeiro_nome = primeiro_nome.upper().strip(),
+                sobrenome = sobrenome.upper().strip(),
                 username = username,
-                email = email,
+                email = email.upper(),
                 ativo = True,
                 senha = generate_password_hash(senha), # Criptografa a senha do usuário
                 chave_publica = str(uuid.uuid4()) # Gera uma chave de identificador único para o usuário

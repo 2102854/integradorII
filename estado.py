@@ -132,8 +132,8 @@ class Estado (Base):
             
             novoEstado = Estado(
                 pais_id = int(aestado['pais_id']),
-                nome = aestado['nome'],
-                sigla = aestado['sigla']
+                nome = aestado['nome'].upper().strip(),
+                sigla = aestado['sigla'].upper().strip()
             )
 
             # Adiciona um novo Estado
@@ -197,8 +197,8 @@ class Estado (Base):
                     raise BusinessException('Sigla informada já cadastrada para outro estado')                
 
             # Atualiza o objeto a ser alterado
-            estado.nome = uestado['nome']
-            estado.sigla = uestado['sigla']
+            estado.nome = uestado['nome'].upper().strip()
+            estado.sigla = uestado['sigla'].upper().strip()
             estado.pais_id = uestado['pais_id']
 
             # Comita as alterações no banco de dados            

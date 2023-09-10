@@ -157,15 +157,15 @@ class Paciente(Base):
 
             novoPaciente = Paciente(
                 cidade_id=apaciente['cidade_id'],
-                nome=apaciente['nome'],
-                data_nasc = apaciente['data_nasc'],
-                tel_1 = apaciente['tel_1'],
-                tel_2 = apaciente['tel_2'],
-                logradouro = apaciente['logradouro'],
-                numero = apaciente['numero'],
-                complemento = apaciente['complemento'],
-                cep = apaciente['cep'],
-                hygia = apaciente['hygia']
+                nome=apaciente['nome'].upper().strip(),
+                data_nasc = apaciente['data_nasc'].strip(),
+                tel_1 = apaciente['tel_1'].strip(),
+                tel_2 = apaciente['tel_2'].strip(),
+                logradouro = apaciente['logradouro'].upper().strip(),
+                numero = apaciente['numero'].strip(),
+                complemento = apaciente['complemento'].upper().strip(),
+                cep = apaciente['cep'].strip(),
+                hygia = apaciente['hygia'].upper().strip()
             )
 
             # Adiciona um novo Paciente
@@ -227,8 +227,8 @@ class Paciente(Base):
                     raise BusinessException('Nome e Hygia informado já cadastrado para outro Paciente')
 
             # Atualiza o objeto a ser alterado
-            paciente.nome = upaciente['nome']
-            paciente.hygia = upaciente['hygia']
+            paciente.nome = upaciente['nome'].upper().strip()
+            paciente.hygia = upaciente['hygia'].upper().strip()
 
             # Comita as alterações no banco de dados
             session.commit()

@@ -157,7 +157,7 @@ class Hospital(Base):
                     raise BusinessException('Nome informado já cadastrado para outro hospital')
 
             # Atualiza o objeto a ser alterado
-            hospital.nome = uhospital['nome']
+            hospital.nome = uhospital['nome'].upper().strip()
             hospital.endereco_id = uhospital['endereco_id']
 
             # Comita as alterações no banco de dados
