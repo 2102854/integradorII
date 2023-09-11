@@ -153,11 +153,19 @@ def index():
 #                    Módulo Segurança                    #
 # ######################################################## 
 
+# Realiza o logout do usuário
+@app.route('/api/logout', methods=['PUT'])
+#@Auth.token_required
+def logout():
+    json_request = request.get_json() 
+    Token.logout(json_request['token'])
+    response = jsonify({'message': 'logout ok'})
+    return response, 204                
+
+
 # Realiza a autenticação do usuário
 @app.route('/api/login', methods=['POST'])
 def login():    
-    # Verifica se existe um token na chamada
-    print(request.headers['Content-Type'])
     token = None
     if 'x-access-token' in request.headers:
         try: 

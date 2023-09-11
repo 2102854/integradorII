@@ -13,6 +13,7 @@ class Auth():
         @wraps(f) 
         def decorated(*args, **kwargs): 
             token = None
+            print(request.headers)
             if 'x-access-token' in request.headers: 
                 token = request.headers['x-access-token'] 
             if not token: 

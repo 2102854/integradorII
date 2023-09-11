@@ -170,7 +170,7 @@ class Cidade(Base):
                 raise BusinessException('Usuário não possui permissão para editar os dados da cidade')
            
             # Verifica os códigos informados
-            if int(uestado['cidade_id']) != cidade_id:
+            if int(ucidade['cidade_id']) != cidade_id:
                 raise BusinessException('Erro na identificação da cidade')                  
 
             # Verifica se os campos estão preenchidos

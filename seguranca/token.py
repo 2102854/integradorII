@@ -57,15 +57,17 @@ class Token (Base):
 
      # Gera o Token de Autenticação
     def add_token(usuario_id, chave_publica):
-        # Caso o usuário possui outros tokens, marca todos com expirado.
-        u = (update(Token).where(
-                    and_(
-                        Token.usuario_id == usuario_id,
-                        Token.expirado == False
-                    )).values(expirado = True))
-        
-        session.execute(u)
-        session.commit()
+        # Caso o usuário possui outros tokens, marca todos com expirado.        
+        rows = session.query(Token).where(Token.usuario_id == usuario_id).count()
+        if rows > 0:                
+            u = (update(Token).where(
+                        and_(
+                            Token.usuario_id == usuario_id,
+                            Token.expirado == False
+                        )).values(expirado = True))
+            
+            session.execute(u)
+            session.commit()
 
         # New Token
         n_token = jwt.encode({ 
@@ -138,3 +140,18 @@ class Token (Base):
                                 
         except Exception as err:
             raise Exception(err) 
+    
+    def logout(ltoken):
+      
+        sql = select(Token).where(Token.token == ltoken)
+        token_logout = session.scalars(sql).one()
+        
+        if not token_logout:
+            return
+        
+        token_logout.expirado = True
+        token_logout.data_expiracao = Token.formata_data(datetime.now(pytz.timezone(parameters['TIMEZONE'])))
+        session.commit()  
+        
+        return 
+        
