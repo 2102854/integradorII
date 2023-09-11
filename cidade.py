@@ -22,6 +22,7 @@ class Cidade(Base):
 
     # Propriedades da Classe
     cidade_id = Column(INTEGER, primary_key=True)
+    pais_id = Column(INTEGER)
     estado_id = Column(INTEGER)
     nome = Column(VARCHAR(250))
     distancia_km = Column(FLOAT)
@@ -29,10 +30,11 @@ class Cidade(Base):
 
     # Método de Representação
     def __repr__(self) -> str:
-        return f"Cidade(cidade_id={self.cidade_id!r}, estado_id={self.estado_id!r}, nome={self.nome!r}, distancia_km={self.distancia_km!r}, valor_pedagio={self.valor_pedagio!r})"
+        return f"Cidade(cidade_id={self.cidade_id!r}, pais_id={self.pais_id!r}, estado_id={self.estado_id!r}, nome={self.nome!r}, distancia_km={self.distancia_km!r}, valor_pedagio={self.valor_pedagio!r})"
 
     # Método de Inicialização - Construtor
-    def __init__(self, estado_id, nome, distancia_km, valor_pedagio):
+    def __init__(self, pais_id, estado_id, nome, distancia_km, valor_pedagio):
+        self.pais_id = pais_id
         self.estado_id = estado_id
         self.nome = nome
         self.distancia_km = distancia_km
@@ -42,6 +44,7 @@ class Cidade(Base):
     def obj_to_dict(self):
         return {
             "cidade_id": int(self.cidade_id),
+            "pais_id": int(self.pais_id),
             "estado_id": int(self.estado_id),
             "nome": self.nome,
             "distancia_km": self.distancia_km,
@@ -102,9 +105,9 @@ class Cidade(Base):
                 raise BusinessException('Usuário não possui permissão para adicionar novas cidades')
 
             # Verifica se os campos estão preenchidos
-          ##  if acidade['cidade_id'] == '' or not acidade['cidade_id']:
-          ##      raise BusinessException('A cidade é obrigatória')
-            print(acidade)
+            if acidade['pais_id'] == '' or not acidade['pais_id']:
+                raise BusinessException('O país é obrigatório')
+
             if acidade['estado_id'] == '' or not acidade['estado_id']:
                 raise BusinessException('O estado é obrigatório')
 
@@ -140,10 +143,11 @@ class Cidade(Base):
                 raise BusinessException('Cidade já cadastrada com este nome')
 
             novaCidade = Cidade(
+                pais_id = acidade['pais_id'],
                 estado_id = acidade['estado_id'],
-                nome = acidade['nome'],
-                distancia_km = float(acidade['distancia_km']),
-                valor_pedagio = float(acidade['valor_pedagio'])
+                nome = acidade['nome'].upper().strip(),
+                distancia_km = float(acidade['distancia_km'].strip()),
+                valor_pedagio = float(acidade['valor_pedagio'].strip())
             )
 
             # Adiciona uma nova Cidade
@@ -158,16 +162,24 @@ class Cidade(Base):
 
             # Atualiza uma Cidade Existente
 
-    def update_cidade(usuario_id, ucidade):
+    def update_cidade(usuario_id, cidade_id, ucidade):
         try:
             # Verifica se o usuário pode adicionar um novo estado ao sistema
             acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Atualizar_Cidades')
             if not acesso_liberado:
                 raise BusinessException('Usuário não possui permissão para editar os dados da cidade')
+           
+            # Verifica os códigos informados
+            if int(uestado['cidade_id']) != cidade_id:
+                raise BusinessException('Erro na identificação da cidade')                  
 
             # Verifica se os campos estão preenchidos
             if ucidade['cidade_id'] == '' or not ucidade['cidade_id']:
                 raise BusinessException('A cidade é obrigatória')
+            
+            # Verifica se os campos estão preenchidos
+            if ucidade['pais_id'] == '' or not ucidade['pais_id']:
+                raise BusinessException('O país é obrigatório')            
 
             if ucidade['estado_id'] == '' or not ucidade['estado_id']:
                 raise BusinessException('O estado é obrigatório')
@@ -181,17 +193,18 @@ class Cidade(Base):
             if ucidade['valor_pedagio'] == '' or not ucidade['valor_pedagio']:
                 raise BusinessException('O valor do pedágio é obrigatório')
 
-                # Recupera os dados da cidade informada
+            # Recupera os dados da cidade informada
             sql = select(Cidade).where(Cidade.cidade_id == ucidade['cidade_id'])
             cidade = session.scalars(sql).one()
             if not cidade:
                 raise BusinessException('Cidade informada não encontrada')
 
-                # Verifica se o nome do Cidade foi alterada.
+            # Verifica se o nome do Cidade foi alterada.
             # Se sim, precisa checar se já existe um cadastrado no sistema
             if cidade.nome != ucidade['nome']:
                 rows = session.query(Cidade).where(
                     and_(
+                        Cidade.pais_id == ucidade['pais_id'],
                         Cidade.estado_id == ucidade['estado_id'],
                         Cidade.nome == ucidade['nome'],
                         Cidade.cidade_id != ucidade['cidade_id']
@@ -199,11 +212,12 @@ class Cidade(Base):
                 if rows > 0:
                     raise BusinessException('Nome informado já cadastrado para outra cidade')
 
-                    # Atualiza o objeto a ser alterado
-            cidade.nome = ucidade['nome']
+            # Atualiza o objeto a ser alterado
+            cidade.nome = ucidade['nome'].upper().strip()
             cidade.estado_id = ucidade['estado_id']
-            cidade.distancia_km = ucidade['distancia_km']
-            cidade.valor_pedagio = ucidade['valor_pedagio']
+            cidade.pais_id = ucidade['pais_id']
+            cidade.distancia_km = ucidade['distancia_km'].strip()
+            cidade.valor_pedagio = ucidade['valor_pedagio'].strip()
 
             # Comita as alterações no banco de dados
             session.commit()

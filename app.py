@@ -425,7 +425,7 @@ def get_cidades(usuario_id: int):
     try:
         cidades = Cidade.get_cidades(usuario_id)
         c = dict_helper_list(cidades)
-        return jsonify(cidades = c)
+        return make_response(c, 200)          
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 404
@@ -436,8 +436,8 @@ def get_cidades(usuario_id: int):
 def get_cidade_id(usuario_id: int, cidade_id: int):
     try:
         cidade = Cidade.get_cidade_id(usuario_id, cidade_id)
-        c = dict_helper_list(cidade)
-        return jsonify(cidade = c)
+        c = dict_helper_obj(cidade) 
+        return make_response(c, 200)      
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 404
@@ -455,6 +455,20 @@ def add_cidade(usuario_id: int):
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 404 
+
+# Edita uma Cidade já cadastrada no Banco de Dados
+@app.route('/api/estados/cidades/<int:cidade_id>', methods=['PUT'])
+@Auth.token_required
+def update_cidade(usuario_id: int, cidade_id: int):
+    try:
+        # Recupera o objeto passado como parametro
+        ucidade = request.get_json()
+        cidade = Cidade.update_cidade(usuario_id, cidade_id, ucidade)
+        c = dict_helper_obj(cidade)
+        return jsonify(cidade = c)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 401          
 
 ##########################################################
 #                      Módulo Hospitais                    #
