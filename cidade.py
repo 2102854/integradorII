@@ -60,7 +60,6 @@ class Cidade(Base):
             if not acesso_liberado:
                 raise BusinessException('Usuário não Possui permissão para visualização dos cidades')
             cidades = session.query(Cidade).all()
-            print(cidades)
             return cidades
         except BusinessException as err:
             raise Exception(err)

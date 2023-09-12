@@ -528,8 +528,8 @@ def add_hospital(usuario_id: int):
 def get_veiculos(usuario_id: int):
     try:
         veiculo = Veiculo.get_veiculos(usuario_id)
-        e = dict_helper_list(veiculo)
-        return jsonify(veiculo = e)
+        v = dict_helper_list(veiculo)
+        return make_response(v, 200)    
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 404
@@ -540,8 +540,8 @@ def get_veiculos(usuario_id: int):
 def get_veiculo_id(usuario_id: int, veiculo_id: int):
     try:
         veiculo = Veiculo.get_veiculo_id(usuario_id, veiculo_id)
-        e = dict_helper_list(veiculo)
-        return jsonify(veiculo = e)
+        v = dict_helper_obj(veiculo) 
+        return make_response(v, 200)    
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 404
@@ -578,7 +578,7 @@ def update_veiculo(usuario_id: int):
 #                      Módulo Pacientes                  #
 # ########################################################
 #Abre a página de pacientes
-@app.route("/pacientes")
+@app.route("/api/pacientes")
 ##@Auth.token_required
 def get_pacientes():
     try:
@@ -591,7 +591,7 @@ def get_pacientes():
         return response, 404
 
 # Recupera o paciente pelo id
-@app.route('/pacientes/<int:paciente_id>', methods=['GET'])
+@app.route('/api/pacientes/<int:paciente_id>', methods=['GET'])
 ##@Auth.token_required
 def get_paciente_id(paciente_id: int):
     try:
@@ -604,7 +604,7 @@ def get_paciente_id(paciente_id: int):
         return response, 404
 
 # Adiciona um Veículo no Banco de Dados
-@app.route('/pacientes/add', methods=['POST'])
+@app.route('/api/pacientes/add', methods=['POST'])
 ##@Auth.token_required
 def add_paciente():
     try:
@@ -619,7 +619,7 @@ def add_paciente():
         return response, 404
 
 # Edita um Paciente já cadastrado no Banco de Dados
-@app.route('/pacientes/update', methods=['POST'])
+@app.route('/api/pacientes/update', methods=['POST'])
 #@Auth.token_required
 def update_paciente():
     try:
@@ -637,33 +637,33 @@ def update_paciente():
 #                     Módulo Motoristas                  #
 # ########################################################
 #Abre a página de motoristas
-@app.route("/motoristas")
+@app.route("/api/motoristas")
 ##@Auth.token_required
 def get_motoristas():
     try:
         usuario_id = 1
         motorista = Motorista.get_motoristas(usuario_id)
-        e = dict_helper_list(motorista)
-        return jsonify(motorista = e)
+        m = dict_helper_list(motorista)
+        return make_response(m, 200)    
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 404
 
 # Recupera o motorista pelo id
-@app.route('/motoristas/<int:motorista_id>', methods=['GET'])
+@app.route('/api/motoristas/<int:motorista_id>', methods=['GET'])
 ##@Auth.token_required
 def get_motorista_id(motorista_id: int):
     try:
         usuario_id = 1
         motorista = Motorista.get_motorista_id(usuario_id, motorista_id)
-        e = dict_helper_list(motorista)
-        return jsonify(motorista = e)
+        m = dict_helper_obj(motorista)
+        return make_response(m, 200)   
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 404
 
 # Adiciona um Motorista no Banco de Dados
-@app.route('/motoristas/add', methods=['POST'])
+@app.route('/api/motoristas/add', methods=['POST'])
 ##@Auth.token_required
 def add_motorista():
     try:
@@ -678,7 +678,7 @@ def add_motorista():
         return response, 404
 
 # Edita um Motorista já cadastrado no Banco de Dados
-@app.route('/motoristas/update', methods=['POST'])
+@app.route('/api/motoristas/update', methods=['POST'])
 #@Auth.token_required
 def update_motorista():
     try:
