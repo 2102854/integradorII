@@ -51,8 +51,7 @@ class Cidade(Base):
             "valor_pedagio": self.valor_pedagio
         }
 
-        # Retorna os estados cadastrados
-
+    # Retorna os estados cadastrados
     def get_cidades(usuario_id):
         try:
             # Verifica se o usuário pode ver o conteúdo da tabela países

@@ -1,5 +1,5 @@
 from sqlalchemy import Column
-from sqlalchemy import create_engine, select, and_
+from sqlalchemy import create_engine, func, select, and_
 from sqlalchemy.dialects.sqlite import (INTEGER, VARCHAR)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
@@ -67,9 +67,17 @@ class Paciente(Base):
             "cep":self.cep,
             "hygia":self.hygia
         }
-
-        # Retorna os pacientes cadastrados
-
+    # Retorna o total de pacientes cadastrados no sistema
+    def get_total_pacientes(usuario_id):
+        # Verifica se o usuário pode ver o conteúdo da tabela de pacientes
+        acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Visualizar_Pacientes')
+        if not acesso_liberado:
+            return 0
+        else:
+            total = session.query(func.count(Paciente.paciente_id)).scalar()
+            return total
+    
+    #Retorna os pacientes cadastrados
     def get_pacientes(usuario_id):
         try:
             # Verifica se o usuário pode ver o conteúdo da tabela de pacientes

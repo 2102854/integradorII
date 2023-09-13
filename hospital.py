@@ -1,8 +1,10 @@
 from sqlalchemy import Column
-from sqlalchemy import create_engine, select, and_
+from sqlalchemy import create_engine, func, select, and_
 from sqlalchemy.dialects.sqlite import (INTEGER, VARCHAR)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.operators import ilike_op
+
 
 from config import parameters
 from seguranca.business_exception import BusinessException
@@ -26,7 +28,7 @@ class Hospital(Base):
 
     # Método de Representação
     def __repr__(self) -> str:
-        return f"Hospital(hospital_id={self.hospital_id_id!r},endereco_id={self.endereco_id!r}, nome={self.nome!r})"
+        return f"Hospital(hospital_id={self.hospital_id!r},endereco_id={self.endereco_id!r}, nome={self.nome!r})"
 
     # Método de Inicialização
     def __init__(self, endereco_id, nome):
@@ -40,6 +42,16 @@ class Hospital(Base):
             "endereco_id": int(self.endereco_id),
             "nome": self.nome
         }
+
+    # Retorna o total de pacientes cadastrados no sistema
+    def get_total_hospitais(usuario_id):
+        # Verifica se o usuário pode ver o conteúdo da tabela hospital
+        acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Visualizar_Hospitais')
+        if not acesso_liberado:
+            return 0
+        else:
+            total = session.query(func.count(Hospital.hospital_id)).scalar()
+            return total
 
     # Retorna os hospitais cadastrados
     def get_hospitais(usuario_id):

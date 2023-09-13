@@ -20,6 +20,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.operators import ilike_op
 
+from dashboard import Dashboard
 from pais import Pais
 from estado import Estado
 from cidade import Cidade
@@ -306,6 +307,22 @@ def get_permissoes_do_grupo(usuario_id: int, grupo_id: int):
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 401    
+
+##########################################################
+#                         DASHBOARD                      #
+# ########################################################  
+# Recupera as informações para apresentação no dashboard
+@app.route('/api/dashboard', methods=['GET'])
+@Auth.token_required
+def get_dashboard(usuario_id):
+    try:
+        dashboard = Dashboard.get_dados(usuario_id)
+        #return jsonify(paises = p) 
+        return make_response(dashboard, 200)
+                    
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 401
         
 ##########################################################
 #                       Módulo Países                    #
