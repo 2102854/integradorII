@@ -1,5 +1,5 @@
 from sqlalchemy import Column
-from sqlalchemy import create_engine, select, and_
+from sqlalchemy import create_engine, func, select, and_
 from sqlalchemy.dialects.sqlite import (INTEGER, VARCHAR, FLOAT)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
@@ -46,6 +46,16 @@ class Veiculo(Base):
             "capacidade": self.capacidade,
             "media_consumo": self.media_consumo
         }
+
+    # Retorna o total de veículos cadastrados no sistema
+    def get_total_veiculos(usuario_id):
+        # Verifica se o usuário pode ver o conteúdo da tabela hospital
+        acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Visualizar_Veiculos')
+        if not acesso_liberado:
+            return 0
+        else:
+            total = session.query(func.count(Veiculo.veiculo_id)).scalar()
+            return total
 
     # Retorna os veículos cadastrados
     def get_veiculos(usuario_id):

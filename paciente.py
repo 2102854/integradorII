@@ -1,8 +1,11 @@
 from sqlalchemy import Column
 from sqlalchemy import create_engine, func, select, and_
-from sqlalchemy.dialects.sqlite import (INTEGER, VARCHAR)
+from sqlalchemy.dialects.sqlite import (BLOB, BOOLEAN, CHAR, DATE, DATETIME, DECIMAL, FLOAT, INTEGER, NUMERIC, JSON, SMALLINT, TEXT, TIME, TIMESTAMP, VARCHAR)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
+
+from datetime import datetime, timedelta 
+from calendar import monthrange
 
 from config import parameters
 from cidade import Cidade
@@ -31,16 +34,17 @@ class Paciente(Base):
     complemento = Column(VARCHAR(50))
     cep = Column(VARCHAR(10))
     hygia = Column(VARCHAR(20))
+    data_cadastro = Column(DATETIME, nullable=False)
 
     # Método de Representação
     def __repr__(self) -> str:
         return f"Paciente(paciente_id={self.paciente_id_id!r},cidade_id={self.cidade_id!r}, nome={self.nome!r}" \
                f"data_nasc={self.data_nasc!r},tel_1={self.tel_1!r}, tel_2={self.tel_2!r}" \
                f"logradouro={self.logradouro!r},numero={self.numero!r}, complemento={self.complemento!r}" \
-               f"cep={self.cep!r},hygia={self.hygia!r})"
+               f"cep={self.cep!r},hygia={self.hygia!r},data_cadastro={self.data_cadastro!r})"
 
     # Método de Inicialização
-    def __init__(self, cidade_id, nome, data_nasc, tel_1, tel_2, logradouro, numero, complemento, cep, hygia):
+    def __init__(self, cidade_id, nome, data_nasc, tel_1, tel_2, logradouro, numero, complemento, cep, hygia, data_cadastro):
         self.cidade_id = cidade_id
         self.nome = nome
         self.data_nasc = data_nasc
@@ -51,6 +55,7 @@ class Paciente(Base):
         self.complemento = complemento
         self.cep = cep
         self.hygia = hygia
+        self.data_cadastro = data_cadastro
 
     # Retorna o resultado da Classe em formato json
     def obj_to_dict(self):
@@ -65,7 +70,8 @@ class Paciente(Base):
             "numero":self.numero,
             "complemento":self.complemento,
             "cep":self.cep,
-            "hygia":self.hygia
+            "hygia":self.hygia,
+            "data_cadastro":self.data_cadastro 
         }
     # Retorna o total de pacientes cadastrados no sistema
     def get_total_pacientes(usuario_id):
@@ -76,6 +82,23 @@ class Paciente(Base):
         else:
             total = session.query(func.count(Paciente.paciente_id)).scalar()
             return total
+        
+    def get_cadastrados_mes_corrente(usuario_id):
+        # Verifica se o usuário pode ver o conteúdo da tabela de pacientes
+        acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Visualizar_Pacientes')
+        if not acesso_liberado:
+            return 0
+        else:
+            
+            #Calcula o primeiro dia do mês
+            #datetime.strptime(date_string, "%m-%d-%Y %H:%M:%S")   
+            # qry = DBSession.query(User).filter(User.birthday.between('1985-01-17', '1988-01-17'))         
+            hoje = datetime.today()
+            inicio_mes = hoje.replace(day=1, hour=0, minute=0, second=1 )
+            fim_mes = hoje.replace(day=monthrange(hoje.year, hoje.month)[1], hour=23, minute=59, second=59)            
+            total = session.query(func.count(Paciente.paciente_id)).filter(Paciente.data_cadastro.between(inicio_mes, fim_mes)).scalar()
+            return total  
+   
     
     #Retorna os pacientes cadastrados
     def get_pacientes(usuario_id):
