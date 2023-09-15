@@ -1,35 +1,12 @@
-from sqlalchemy import Column
-from sqlalchemy import create_engine, select, and_
-from sqlalchemy.dialects.sqlite import (INTEGER, VARCHAR, FLOAT)
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session
-
-from config import parameters
+"""
+Módulo Dashboard
+"""
 from veiculo import Veiculo
 from paciente import Paciente
 from hospital import Hospital
 from agendamento import Agendamento
-from seguranca.business_exception import BusinessException
-from seguranca.pemissoes import Permissao
 
-import json
-from datetime import datetime, timedelta 
-from calendar import monthrange
-
-
-class Dashboard():
-    
-    # Cria um retorno de dicionário de uma lista de objetos para retorno json
-    def dict_helper_list(objlist):
-        result = [item.obj_to_dict() for item in objlist]
-        return result
-
-    # Cria um retorno de dicionário de um objeto para retorno json
-    def dict_helper_obj(obj):
-        result = json.JSONDecoder().decode(json.dumps(obj.obj_to_dict(), indent = 2))
-        return result
-
-    
+class Dashboard():   
     # Retorna os dados principais para o Dashboard
     def get_dados(usuario_id):
         #Retorna os números totais para exibição

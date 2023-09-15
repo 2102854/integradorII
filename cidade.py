@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from config import parameters
 from estado import Estado
+from pais import Pais
 from seguranca.business_exception import BusinessException
 from seguranca.pemissoes import Permissao
 
@@ -53,13 +54,32 @@ class Cidade(Base):
 
     # Retorna os estados cadastrados
     def get_cidades(usuario_id):
-        try:
+        try:            
             # Verifica se o usuário pode ver o conteúdo da tabela países
             acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Visualizar_Cidades')
             if not acesso_liberado:
                 raise BusinessException('Usuário não Possui permissão para visualização dos cidades')
-            cidades = session.query(Cidade).all()
-            return cidades
+            
+            listCidades = []
+            cidades = (
+                    session.query(Cidade, Estado, Pais)
+                    .join(Estado, Cidade.estado_id == Estado.estado_id)
+                    .join(Pais, Estado.pais_id == Pais.pais_id)
+                    .order_by(Cidade.nome).all()
+            )
+            
+            for cidade in cidades:
+                c =  {
+                    "cidade_id": int(cidade.Cidade.cidade_id),
+                    "estado_id": int(cidade.Estado.estado_id),
+                    "pais_id": int(cidade.Pais.pais_id),
+                    "nome": cidade.Cidade.nome,
+                    "distancia_km": float(cidade.Cidade.distancia_km),
+                    "valor_pedagio": float(cidade.Cidade.valor_pedagio),
+                }   
+                listCidades.append(c)              
+            return listCidades
+        
         except BusinessException as err:
             raise Exception(err)
         except Exception:
@@ -84,7 +104,8 @@ class Cidade(Base):
                 raise BusinessException('Usuário não Possui permissão para visualização da cidade informada')
 
             # Retorna o grupo selecionado
-            cidade = session.query(Cidade).where(Cidade.cidade_id == cidade_id).all()
+            sql = select(Cidade).where(Cidade.cidade_id == cidade_id)
+            cidade = session.scalars(sql).one()                         
             if not cidade:
                 raise BusinessException('Cidade não encontrada')
 
