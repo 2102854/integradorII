@@ -26,7 +26,7 @@ class Paciente(Base):
     paciente_id = Column(INTEGER, primary_key=True)
     cidade_id = Column(INTEGER)
     nome = Column(VARCHAR(250))
-    data_nasc = Column(VARCHAR(10))
+    data_nasc = Column(DATETIME, nullable=False)
     tel_1 = Column(INTEGER)
     tel_2 = Column(INTEGER)
     logradouro = Column(VARCHAR(400))
@@ -38,7 +38,7 @@ class Paciente(Base):
 
     # Método de Representação
     def __repr__(self) -> str:
-        return f"Paciente(paciente_id={self.paciente_id_id!r},cidade_id={self.cidade_id!r}, nome={self.nome!r}" \
+        return f"Paciente(paciente_id={self.paciente_id!r},cidade_id={self.cidade_id!r}, nome={self.nome!r}" \
                f"data_nasc={self.data_nasc!r},tel_1={self.tel_1!r}, tel_2={self.tel_2!r}" \
                f"logradouro={self.logradouro!r},numero={self.numero!r}, complemento={self.complemento!r}" \
                f"cep={self.cep!r},hygia={self.hygia!r},data_cadastro={self.data_cadastro!r})"
@@ -90,9 +90,7 @@ class Paciente(Base):
             return 0
         else:
             
-            #Calcula o primeiro dia do mês
-            #datetime.strptime(date_string, "%m-%d-%Y %H:%M:%S")   
-            # qry = DBSession.query(User).filter(User.birthday.between('1985-01-17', '1988-01-17'))         
+            #Calcula o primeiro dia do mês      
             hoje = datetime.today()
             inicio_mes = hoje.replace(day=1, hour=0, minute=0, second=1 )
             fim_mes = hoje.replace(day=monthrange(hoje.year, hoje.month)[1], hour=23, minute=59, second=59)            
@@ -269,3 +267,40 @@ class Paciente(Base):
             raise Exception(err)
         except Exception as e:
             return Exception('Erro desconhecido')
+    
+    # Exporta dados para o Dashboard
+    def get_cadastros_ano(usuario_id):
+
+        # Verifica se o usuário pode adicionar um novo paciente ao sistema
+        acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Atualizar_Pacientes')
+        if not acesso_liberado:
+            return None        
+        else: 
+            cadastros_mes = []
+            hoje = datetime.today()
+            ano = hoje.year
+            inicio_ano = hoje.replace(day=1, month=1, year=ano, hour=0, minute=0, second=1 )
+            fim_ano = hoje.replace(day=31, month=12, year=ano, hour=23, minute=59, second=59)            
+            total = session.query(func.strftime("%m", Paciente.data_cadastro), func.count(func.strftime("%m", Paciente.data_cadastro)))\
+                .filter(Paciente.data_cadastro.between(inicio_ano, fim_ano))\
+                .group_by(func.strftime("%m", Paciente.data_cadastro), func.strftime("%m", Paciente.data_cadastro)).all()
+            
+            for i in range(1,13):
+                y = ''
+                if i < 10:
+                    y = f'0{i}'
+                else:
+                    y = str(i)
+                
+                #at = {f'{y}' : 0}
+                at = 0
+                
+                for mes in total:
+                  
+                    if mes[0] == y:
+                        #at = {f'{y}' : mes[1]}
+                        at = mes[1]
+                        
+                cadastros_mes.append(at)
+        
+        return cadastros_mes            

@@ -8,6 +8,12 @@ from config import parameters
 from seguranca.business_exception import BusinessException
 from seguranca.pemissoes import Permissao
 
+from paciente import Paciente
+from hospital import Hospital
+from datetime import datetime, timedelta 
+from calendar import monthrange
+from flask import jsonify
+
 Base = declarative_base()
 
 # Mapeia o banco de dados
@@ -91,11 +97,61 @@ class Agendamento(Base):
             total = session.query(func.count(Agendamento.agendamento_id)).scalar()
             return total
     
-    def get_last_agendamentos(usuario_id):
+    def get_last_agendamentos(usuario_id):        
+        listAgendamentos = []
         # Verifica se o usuário pode ver o conteúdo da tabela hospital
         acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Visualizar_Hospitais')
         if not acesso_liberado:
-            return []
+            return listAgendamentos
         else:           
-            agendamento = session.query(Agendamento).order_by(Agendamento.agendamento_id.desc()).limit(10).all()
-            return agendamento
+            agendamentos = session.query(Agendamento, Paciente, Hospital )\
+                .join(Paciente, Agendamento.paciente_id == Paciente.paciente_id)\
+                .join(Hospital, Agendamento.hospital_id == Hospital.hospital_id)\
+                .order_by(Agendamento.agendamento_id.desc()).limit(10).all()
+            
+            for agendamento in agendamentos:
+                ag =  {
+                    "agendamento_id": agendamento.Agendamento.agendamento_id,
+                    "nome": agendamento.Paciente.nome,
+                    "data_nascimento": datetime.isoformat(agendamento.Paciente.data_nasc),
+                    "data_remocao": datetime.isoformat(agendamento.Agendamento.data_remocao),
+                    "hospital": agendamento.Hospital.nome
+                }   
+                listAgendamentos.append(ag)   
+
+        return listAgendamentos
+
+    def get_agendamentos_ano(usuario_id):        
+        acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Visualizar_Hospitais')
+        if not acesso_liberado:
+            return None
+        else: 
+            atendimentos_mes = []
+            hoje = datetime.today()
+            ano = hoje.year
+            inicio_ano = hoje.replace(day=1, month=1, year=ano, hour=0, minute=0, second=1 )
+            fim_ano = hoje.replace(day=31, month=12, year=ano, hour=23, minute=59, second=59)            
+            total = session.query(func.strftime("%m", Agendamento.data_remocao), func.count(func.strftime("%m", Agendamento.data_remocao)))\
+                .filter(Agendamento.data_remocao.between(inicio_ano, fim_ano))\
+                .group_by(func.strftime("%m", Agendamento.data_remocao), func.strftime("%m", Agendamento.data_remocao)).all()
+            
+            for i in range(1,13):
+                y = ''
+                if i < 10:
+                    y = f'0{i}'
+                else:
+                    y = str(i)
+                
+                #at = {f'{y}' : 0}
+                at = 0
+                
+                for mes in total:
+                  
+                    if mes[0] == y:
+                        #at = {f'{y}' : mes[1]}
+                        at = mes[1]
+                        
+                atendimentos_mes.append(at)
+        
+        return atendimentos_mes
+     

@@ -49,16 +49,27 @@ class Estado (Base):
     # Retorna os países cadastrados
     def get_estados(usuario_id):
         try:
+            listEstados = []
             # Verifica se o usuário pode ver o conteúdo da tabela países
             acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Visualizar_Estados')
             if not acesso_liberado:                
                 raise BusinessException('Usuário não Possui permissão para visualização dos estados')
-            estados = session.query(Estado).all()   
-            return estados 
+            estados = session.query(Estado, Pais).join(Pais, Estado.pais_id == Pais.pais_id).order_by(Estado.nome).all() 
+            
+            for estado in estados:
+                e =  {
+                    "estado_id": int(estado.Estado.estado_id),
+                    "pais_id": int(estado.Estado.pais_id),
+                    "nome": estado.Estado.nome,
+                    "sigla": estado.Estado.sigla,
+                    "pais_nome": estado.Pais.nome
+                }   
+                listEstados.append(e)  
+                               
+            return listEstados 
         except BusinessException as err:
             raise Exception(err)
         except Exception:
-            # tratamento de erro desconhecido
             return Exception('Erro desconhecido')
 
     # Retorna o Estado informado

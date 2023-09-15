@@ -392,8 +392,8 @@ def update_pais(usuario_id: int, pais_id: int):
 def get_estados(usuario_id):
     try:
         estados = Estado.get_estados(usuario_id)
-        e = dict_helper_list(estados) 
-        return make_response(e, 200)      
+        #e = dict_helper_list(estados) 
+        return make_response(estados, 200)      
 
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
