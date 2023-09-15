@@ -72,7 +72,9 @@ class Cidade(Base):
                 c =  {
                     "cidade_id": int(cidade.Cidade.cidade_id),
                     "estado_id": int(cidade.Estado.estado_id),
+                    "estado_nome": str(cidade.Estado.nome),
                     "pais_id": int(cidade.Pais.pais_id),
+                    "pais_nome": str(cidade.Pais.nome),
                     "nome": cidade.Cidade.nome,
                     "distancia_km": float(cidade.Cidade.distancia_km),
                     "valor_pedagio": float(cidade.Cidade.valor_pedagio),

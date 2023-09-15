@@ -7,7 +7,6 @@
 # Verificar a necessidade de criar classes separadas nos casos de herança (especialização ou generalização)
 
 import locale
-import json
 
 from flask import Flask
 from flask_cors import CORS 
