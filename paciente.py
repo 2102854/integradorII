@@ -1,8 +1,9 @@
 from sqlalchemy import Column
-from sqlalchemy import create_engine, func, select, and_
-from sqlalchemy.dialects.sqlite import (BLOB, BOOLEAN, CHAR, DATE, DATETIME, DECIMAL, FLOAT, INTEGER, NUMERIC, JSON, SMALLINT, TEXT, TIME, TIMESTAMP, VARCHAR)
+from sqlalchemy import create_engine, select, and_, func
+from sqlalchemy.dialects.sqlite import (INTEGER, VARCHAR, DATETIME)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
+from config import parameters
 
 from datetime import datetime, timedelta 
 from calendar import monthrange
@@ -96,23 +97,43 @@ class Paciente(Base):
             fim_mes = hoje.replace(day=monthrange(hoje.year, hoje.month)[1], hour=23, minute=59, second=59)            
             total = session.query(func.count(Paciente.paciente_id)).filter(Paciente.data_cadastro.between(inicio_mes, fim_mes)).scalar()
             return total  
-   
     
-    #Retorna os pacientes cadastrados
     def get_pacientes(usuario_id):
         try:
             # Verifica se o usuário pode ver o conteúdo da tabela de pacientes
             acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Visualizar_Pacientes')
             if not acesso_liberado:
-                raise BusinessException('Usuário não Possui permissão para visualização dos pacientes')
-            paciente = session.query(Paciente).all()
-            return paciente
+                raise BusinessException('Usuário não Possui permissão para visualização dos pacientes')        
+            
+            listpaciente = []
+            pacientes = session.query(Paciente, Cidade).join(Cidade, Paciente.cidade_id == Cidade.cidade_id).order_by(Paciente.nome).all()
+
+            for paciente in pacientes:
+                p =  {             
+                    "paciente_id": int(paciente.Paciente.paciente_id),
+                    "cidade_id": int(paciente.Cidade.cidade_id),
+                    "cidade_nome": str(paciente.Cidade.nome),
+                    "nome": str(paciente.Paciente.nome),
+                    "data_nasc": datetime.isoformat(paciente.Paciente.data_nasc),
+                    "tel_1": str(paciente.Paciente.tel_1),
+                    "tel_2": str(paciente.Paciente.tel_2),
+                    "logradouro": str(paciente.Paciente.logradouro),
+                    "numero": str(paciente.Paciente.numero),
+                    "complemento": str(paciente.Paciente.complemento),
+                    "cep": str(paciente.Paciente.cep),
+                    "hygia": str(paciente.Paciente.hygia),
+                    "data_cadastro": datetime.isoformat(paciente.Paciente.data_cadastro)
+
+                }   
+                listpaciente.append(p)              
+            
+            return listpaciente
+        
         except BusinessException as err:
             raise Exception(err)
         except Exception:
-            # tratamento de erro desconhecido
-            return Exception('Erro desconhecido')
-
+            return Exception('Erro desconhecido')           
+    
     # Retorna o Paciente informado
     def get_paciente_id(usuario_id, paciente_id, permissao_pai: str = None):
         """

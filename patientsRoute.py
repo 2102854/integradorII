@@ -15,13 +15,11 @@ patientsRoute = Blueprint('patientsRoute', __name__)
 
 #Abre a página de pacientes
 @patientsRoute.route("/api/pacientes")
-##@Auth.token_required
-def get_pacientes():
+@Auth.token_required
+def get_pacientes(usuario_id: int):
     try:
-        usuario_id = 1
         paciente = Paciente.get_pacientes(usuario_id)
-        e = dict_helper_list(paciente)
-        return jsonify(paciente = e)
+        return make_response(paciente, 200)  
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 404
