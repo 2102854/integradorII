@@ -10,6 +10,12 @@ from seguranca.pemissoes import Permissao
 
 from paciente import Paciente
 from hospital import Hospital
+from tipo_encaminhamento import Tipo_Encaminhamento
+from tipo_doenca import Tipo_Doenca
+from tipo_remocao import Tipo_Remocao
+from motorista import Motorista
+from veiculo import Veiculo
+from usuario import Usuario
 from datetime import datetime, timedelta 
 from calendar import monthrange
 from flask import jsonify
@@ -40,6 +46,7 @@ class Agendamento(Base):
     observacao = Column(VARCHAR(250))
     custo_ifd = Column(FLOAT)
     custo_estadia = Column(FLOAT)
+    estado_geral_paciente = Column(VARCHAR(250))
 
     # Método de Representação
     def __repr__(self) -> str:
@@ -47,11 +54,12 @@ class Agendamento(Base):
             tipo_doenca_id={self.tipo_doenca_id!r},tipo_remocao_id={self.tipo_remocao_id!r}, hospital_id={self.hospital_id!r}, veiculo_id={self.veiculo_id!r}\
             usuario_id={self.usuario_id!r},motorista_id={self.motorista_id!r}, responsavel_pac={self.responsavel_pac!r}, data_remocao={self.data_remocao!r}\
             saida_prevista={self.saida_prevista!r},observacao={self.observacao!r}, custo_ifd={self.custo_ifd!r}, custo_estadia={self.custo_estadia!r}\
+            estado_geral_paciente={self.estado_geral_paciente!r}\
             )"
 
     # Método de Inicialização
     def __init__(self, agendamento_id, paciente_id, tipo_encaminhamento_id, tipo_doenca_id, tipo_remocao_id, hospital_id, veiculo_id, usuario_id, motorista_id,\
-        responsavel_pac, data_remocao, saida_prevista, observacao, custo_ifd, custo_estadia ):
+        responsavel_pac, data_remocao, saida_prevista, observacao, custo_ifd, custo_estadia, estado_geral_paciente ):
         self.agendamento_id = agendamento_id
         self.paciente_id = paciente_id
         self.tipo_encaminhamento_id = tipo_encaminhamento_id
@@ -67,6 +75,7 @@ class Agendamento(Base):
         self.observacao = observacao
         self.custo_ifd = custo_ifd
         self.custo_estadia = custo_estadia
+        self.estado_geral_paciente = estado_geral_paciente
 
     # Retorna o resultado da Classe em formato json
     def obj_to_dict(self):
@@ -81,16 +90,17 @@ class Agendamento(Base):
             "motorista_id": int(self.motorista_id),
             "responsavel_pac": self.responsavel_pac,
             "data_remocao": str(self.data_remocao),
-            "data_remocao": str(self.saida_prevista),            
+            "saida_prevista": str(self.saida_prevista),            
             "observacao": self.observacao,
             "custo_ifd": self.custo_ifd,
-            "custo_estadia": self.custo_estadia
+            "custo_estadia": self.custo_estadia,
+            "estado_geral_paciente": self.estado_geral_paciente
         }
 
     # Retorna o total de pacientes cadastrados no sistema
     def get_total_agendamento(usuario_id):
         # Verifica se o usuário pode ver o conteúdo da tabela hospital
-        acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Visualizar_Hospitais')
+        acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Visualizar_Agendamentos')
         if not acesso_liberado:
             return 0
         else:
@@ -100,14 +110,15 @@ class Agendamento(Base):
     def get_last_agendamentos(usuario_id):        
         listAgendamentos = []
         # Verifica se o usuário pode ver o conteúdo da tabela hospital
-        acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Visualizar_Hospitais')
+        acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Visualizar_Agendamentos')
         if not acesso_liberado:
             return listAgendamentos
         else:           
-            agendamentos = session.query(Agendamento, Paciente, Hospital )\
-                .join(Paciente, Agendamento.paciente_id == Paciente.paciente_id)\
-                .join(Hospital, Agendamento.hospital_id == Hospital.hospital_id)\
+            agendamentos = (session.query(Agendamento, Paciente, Hospital,Tipo_Encaminhamento )
+                .join(Paciente, Agendamento.paciente_id == Paciente.paciente_id)
+                .join(Hospital, Agendamento.hospital_id == Hospital.hospital_id)
                 .order_by(Agendamento.agendamento_id.desc()).limit(10).all()
+            )
             
             for agendamento in agendamentos:
                 ag =  {
@@ -122,7 +133,7 @@ class Agendamento(Base):
         return listAgendamentos
 
     def get_agendamentos_ano(usuario_id):        
-        acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Visualizar_Hospitais')
+        acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Visualizar_Agendamentos')
         if not acesso_liberado:
             return None
         else: 
@@ -157,17 +168,59 @@ class Agendamento(Base):
 
     #Retorna os agendamentos cadastrados
     def get_agendamentos(usuario_id):
+        listAgendamentos = []
         try:
             # Verifica se o usuário pode ver o conteúdo da tabela de pacientes
             acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Visualizar_Agendamentos')
             if not acesso_liberado:
                 raise BusinessException('Usuário não Possui permissão para visualização dos agendamentos')
-            agendamento = session.query(Agendamento).all()
-            return agendamento
+            
+            agendamentos = (
+                session.query(
+                    Agendamento, Paciente, Hospital, Tipo_Encaminhamento, Tipo_Doenca, Tipo_Remocao, 
+                    Veiculo, Usuario, Motorista
+                )
+                .join(Paciente, Agendamento.paciente_id == Paciente.paciente_id)
+                .join(Hospital, Agendamento.hospital_id == Hospital.hospital_id)
+                .join(Tipo_Encaminhamento, Agendamento.tipo_encaminhamento_id ==  Tipo_Encaminhamento.tipo_encaminhamento_id)
+                .join(Tipo_Doenca, Agendamento.tipo_doenca_id == Tipo_Doenca.tipo_doenca_id)
+                .join(Tipo_Remocao, Agendamento.tipo_remocao_id == Tipo_Remocao.tipo_remocao_id)
+                .join(Veiculo, Agendamento.veiculo_id == Veiculo.veiculo_id)
+                .join(Usuario, Agendamento.usuario_id == Usuario.usuario_id)
+                .join(Motorista, Agendamento.motorista_id == Motorista.motorista_id)
+                .order_by(Agendamento.agendamento_id.desc()).all()
+            )
+            
+            for agendamento in agendamentos:
+                ag =  {
+                    "agendamento_id": agendamento.Agendamento.agendamento_id,
+                    "nome": agendamento.Paciente.nome,
+                    "hygia": agendamento.Paciente.hygia,
+                    "tel_1": agendamento.Paciente.tel_1,
+                    "data_nascimento": datetime.isoformat(agendamento.Paciente.data_nasc),
+                    "data_remocao": datetime.isoformat(agendamento.Agendamento.data_remocao),
+                    "saida_prevista": datetime.isoformat(agendamento.Agendamento.saida_prevista),
+                    "hospital": agendamento.Hospital.nome,
+                    "tipo_encaminhamento": agendamento.Tipo_Encaminhamento.nome, 
+                    "tipo_doenca": agendamento.Tipo_Doenca.nome, 
+                    "tipo_remocao": agendamento.Tipo_Remocao.nome, 
+                    "veiculo_modelo": agendamento.Veiculo.modelo,
+                    "veiculo_placa": agendamento.Veiculo.placa,
+                    "veiculo_capacidade": agendamento.Veiculo.capacidade,
+                    "veiculo_media_consumo": agendamento.Veiculo.media_consumo,
+                    "usuario": agendamento.Usuario.primeiro_nome + ' ' + agendamento.Usuario.sobrenome,
+                    "motorista": agendamento.Motorista.nome,
+                    "responsavel_pac": agendamento.Agendamento.responsavel_pac,
+                    "estado_geral_paciente": agendamento.Agendamento.estado_geral_paciente,
+                    "observacao": agendamento.Agendamento.observacao,
+                    "custo_ifd": agendamento.Agendamento.custo_ifd,
+                    "custo_estadia": agendamento.Agendamento.custo_estadia
+                }   
+                listAgendamentos.append(ag)      
+            return listAgendamentos
         except BusinessException as err:
             raise Exception(err)
         except Exception:
-            # tratamento de erro desconhecido
             return Exception('Erro desconhecido')
 
     def add_agendamento(usuario_id, aagendamento):
