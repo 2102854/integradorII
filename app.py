@@ -2,9 +2,8 @@
 # Grupo 5
 
 # OBSERVAÇÕES GERAIS
-# A app.py será a página principal de rotas e não deverá tratar das regras de negócios. Apenas validar autenticação e parametros recebidos
+# A app.py será a página principal de rotas e não deverá tratar das regras de negócios. Apenas registrar as rotas
 # Cada tabela do bd deverá ter sua própria Classe (arquivo.py)
-# Verificar a necessidade de criar classes separadas nos casos de herança (especialização ou generalização)
 
 import locale
 
@@ -24,6 +23,8 @@ from patientsRoute import patientsRoute
 from driversRoute import driversRoute
 from removalTypesRoute import removalTypesRoute
 from disease_typesRoute import diseaseTypesRoute
+from patient_referralRoute import patient_referralRoute
+from schedulingRoute import schedulingRoute
 
 """
 Config App
@@ -50,6 +51,8 @@ app.register_blueprint(removalTypesRoute)
 app.register_blueprint(usersRoute)
 app.register_blueprint(groupsRoute)
 app.register_blueprint(diseaseTypesRoute)
+app.register_blueprint(patient_referralRoute)
+app.register_blueprint(schedulingRoute)
 
 locale.setlocale( locale.LC_ALL,'pt_BR.UTF-8' )
 

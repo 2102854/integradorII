@@ -154,4 +154,101 @@ class Agendamento(Base):
                 atendimentos_mes.append(at)
         
         return atendimentos_mes
-     
+
+    #Retorna os agendamentos cadastrados
+    def get_agendamentos(usuario_id):
+        try:
+            # Verifica se o usuário pode ver o conteúdo da tabela de pacientes
+            acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Visualizar_Agendamentos')
+            if not acesso_liberado:
+                raise BusinessException('Usuário não Possui permissão para visualização dos agendamentos')
+            agendamento = session.query(Agendamento).all()
+            return agendamento
+        except BusinessException as err:
+            raise Exception(err)
+        except Exception:
+            # tratamento de erro desconhecido
+            return Exception('Erro desconhecido')
+
+    def add_agendamento(usuario_id, aagendamento):
+        try:
+            # Verifica se o usuário pode adicionar um novo agendamento ao sistema
+            acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Criar_Agendamentos')
+            if not acesso_liberado:
+                raise BusinessException('Usuário não possui permissão para adicionar novos agendamentos')
+
+            # Verifica se os campos estão preenchidos
+            if aagendamento['paciente_id'] == '' or not aagendamento['paciente_id']:
+                raise BusinessException('O paciente é obrigatório')
+
+            if aagendamento['tipo_encaminhamento_id'] == '' or not aagendamento['tipo_encaminhamento_id']:
+                raise BusinessException('Tipo de encaminhamento do Paciente é obrigatório')
+
+            if aagendamento['tipo_doenca_id'] == '' or not aagendamento['tipo_doenca_id']:
+                raise BusinessException('Tipo de doença do Paciente é obrigatória')
+
+            if aagendamento['tipo_remocao_id'] == '' or not aagendamento['tipo_remocao_id']:
+                raise BusinessException('Tipo de remoção do Paciente é obrigatório')
+
+            if aagendamento['hospital_id'] == '' or not aagendamento['hospital_id']:
+                raise BusinessException('Hospital do Paciente é obrigatório')
+
+            if aagendamento['veiculo_id'] == '' or not aagendamento['veiculo_id']:
+                raise BusinessException('O veículo é obrigatório')
+
+            if aagendamento['responsavel_pac'] == '' or not aagendamento['responsavel_pac']:
+                raise BusinessException('responsável pelo Paciente é obrigatório')
+
+            if aagendamento['usuario_id'] == '' or not aagendamento['usuario_id']:
+                raise BusinessException('Usuário é obrigatório')
+
+            if aagendamento['motorista_id'] == '' or not aagendamento['motorista_id']:
+                raise BusinessException('Motorista é obrigatório')
+
+            if aagendamento['data_remocao'] == '' or not aagendamento['data_remocao']:
+                raise BusinessException('Data de remoção do Paciente é obrigatória')
+
+            if aagendamento['saida_prevista'] == '' or not aagendamento['saida_prevista']:
+                raise BusinessException('Saida prevista do Paciente é obrigatória')
+
+            if aagendamento['observacao'] == '' or not aagendamento['observacao']:
+                raise BusinessException('Observção é obrigatória')
+
+            if aagendamento['custo_ifd'] == '' or not aagendamento['custo_ifd']:
+                raise BusinessException('Custo IFD é obrigatório')
+
+            if aagendamento['custo_estadia'] == '' or not aagendamento['custo_estadia']:
+                raise BusinessException('Custo estadia é obrigatório')
+
+            # Verifica se o paciente informado existe no sistema
+            paciente = Paciente.get_paciente_id(usuario_id, aagendamento['paciente_id'], 'Pode_Criar_Paciente')
+            if not paciente:
+                raise BusinessException('Paciente informado não está cadastrado')
+
+            novoAgendamento = Agendamento(
+                paciente_id=aagendamento['paciente_id'],
+                tipo_encaminhamento_id=aagendamento['tipo_encaminhamento_id'],
+                tipo_doenca_id=aagendamento['tipo_doenca_id'],
+                tipo_remocao_id=aagendamento['tipo_remocao_id'],
+                hospital_id=aagendamento['hospital_id'],
+                veiculo_id=aagendamento['veiculo_id'],
+                responsavel_pac=aagendamento['responsavel_pac'].upper().strip(),
+                estado_geral_paciente=aagendamento['estado_geral_paciente'].upper().strip(),
+                usuario_id=aagendamento['usuario_id'],
+                motorista_id=aagendamento['motorista_id'],
+                observacao = aagendamento['observacao'].upper().strip(),
+                data_remocao = aagendamento['data_remocao'].strip(),
+                saida_prevista=aagendamento['saida_prevista'].strip(),
+                custo_ifd = aagendamento['custo_ifd'],
+                custo_estadia=aagendamento['custo_estadia']
+            )
+
+            # Adiciona um novo Paciente
+            session.add(novoAgendamento)
+            session.commit()
+            return novoAgendamento
+
+        except BusinessException as err:
+            raise Exception(err)
+        except Exception as e:
+            return Exception('Erro desconhecido')     

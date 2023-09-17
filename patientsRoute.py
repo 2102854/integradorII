@@ -1,6 +1,6 @@
-##########################################################
-#                      Módulo Pacientes                  #
-# ########################################################
+"""
+Módulo Pacientes
+"""
 
 from flask import Blueprint
 import locale
