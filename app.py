@@ -23,6 +23,7 @@ from vehiclesRoute import vehiclesRoute
 from patientsRoute import patientsRoute
 from driversRoute import driversRoute
 from removalTypesRoute import removalTypesRoute
+from disease_typesRoute import diseaseTypesRoute
 
 """
 Config App
@@ -48,6 +49,7 @@ app.register_blueprint(driversRoute)
 app.register_blueprint(removalTypesRoute)
 app.register_blueprint(usersRoute)
 app.register_blueprint(groupsRoute)
+app.register_blueprint(diseaseTypesRoute)
 
 locale.setlocale( locale.LC_ALL,'pt_BR.UTF-8' )
 

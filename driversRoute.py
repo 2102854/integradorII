@@ -1,7 +1,6 @@
-##########################################################
-#                     Módulo Motoristas                  #
-# ########################################################
-
+"""
+Módulo Motoristas
+"""
 from flask import Blueprint
 import locale
 from dict_helper import dict_helper_list, dict_helper_obj
