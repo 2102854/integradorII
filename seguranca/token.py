@@ -75,7 +75,7 @@ class Token (Base):
                     'chave_publica': chave_publica,
                     'exp' : datetime.utcnow() + timedelta(hours= 8)              
                 }, parameters['SECRET_KEY'], algorithm="HS256") 
-         except Exception as e:
+        except Exception as err:
             raise Exception(err)    
         
         dt_criacao = datetime.now(pytz.timezone(parameters['TIMEZONE']))

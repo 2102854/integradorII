@@ -16,8 +16,7 @@ class Auth():
             print(request.headers)
             if 'x-access-token' in request.headers: 
                 token = request.headers['x-access-token'] 
-            if not token: 
-                
+            if not token:                 
                 return jsonify({'message' : 'Token não informado'}), 401
             try: 
                 
@@ -46,7 +45,12 @@ class Auth():
         success: bool = False
         msg: str = 'E-mail ou Senha não é válido'
         authorization = None
-        try:           
+        try:
+            
+            # Verifica o IP do usuário que iniciou a sessão
+            ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
+            print(ip)
+                       
             # Verifica se as informações foram passadas corretamente para executar o login
             if not email or not senha:                 
                 #return make_response('Não foi possível verificar', 401, {'WWW-Authenticate' : 'Basic realm =E-mail ou Senha não é válido'})
