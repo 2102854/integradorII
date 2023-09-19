@@ -70,10 +70,13 @@ class Token (Base):
             session.commit()
 
         # New Token
-        n_token = jwt.encode({ 
-                'chave_publica': chave_publica,
-                'exp' : datetime.utcnow() + timedelta(hours= 8)              
-            }, parameters['SECRET_KEY'], algorithm="HS256")     
+        try:
+            n_token = jwt.encode({ 
+                    'chave_publica': chave_publica,
+                    'exp' : datetime.utcnow() + timedelta(hours= 8)              
+                }, parameters['SECRET_KEY'], algorithm="HS256") 
+         except Exception as e:
+            raise Exception(err)    
         
         dt_criacao = datetime.now(pytz.timezone(parameters['TIMEZONE']))
         dt_expiracao = datetime.now(pytz.timezone(parameters['TIMEZONE'])) + timedelta(minutes = parameters['LOGOUT_MINUTES'])        

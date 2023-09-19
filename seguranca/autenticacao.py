@@ -17,11 +17,12 @@ class Auth():
             if 'x-access-token' in request.headers: 
                 token = request.headers['x-access-token'] 
             if not token: 
+                
                 return jsonify({'message' : 'Token não informado'}), 401
             try: 
                 
                 # Valida o token informado
-                Token.valida_token(token)
+                Token.valida_token(token)   
 
                 # Decodifica o Token
                 payload = jwt.decode(token, parameters['SECRET_KEY'], algorithms=["HS256"]) 
