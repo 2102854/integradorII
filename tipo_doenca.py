@@ -41,7 +41,7 @@ class Tipo_Doenca (Base):
     #Retorna todos as doenças
     def get_tipoDoenca(usuario_id):
         try:
-            acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Vizualizar_Tipo_de_Doenca')
+            acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Vizualizar_Tipo_Doenca')
             if not acesso_liberado:
                 raise BusinessException('Usuário com permissão negada')
             doencas = session.query(Tipo_Doenca).all()
@@ -63,7 +63,7 @@ class Tipo_Doenca (Base):
             if permissao_pai:
                 acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, permissao_pai)
             else:
-                acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Vizualizar_Tipo_de_Doenca')
+                acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Vizualizar_Tipo_Doenca')
                 if not acesso_liberado:
                     raise BusinessException('Usuário não possui permissão para vizualizar os tipos de doença')
 
