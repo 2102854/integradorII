@@ -50,7 +50,7 @@ class Tipo_Remocao(Base):
             raise Exception(err)
         except Exception:
             return Exception('Erro desconhecido')
-
+        
     # Retorna o tipo de remoção informado
     def get_tipo_remocao_id(usuario_id, tipo_remocao_id, permissao_pai: str = None):
         """
@@ -111,12 +111,16 @@ class Tipo_Remocao(Base):
             return Exception('Erro desconhecido')
 
     # Atualiza um Veículo Tipo de Remoção
-    def update_tipo_remocao(usuario_id, utiporemocao):
+    def update_tipo_remocao(usuario_id, tipo_remocao_id, utiporemocao):
         try:
             # Verifica se o usuário pode adicionar um novo tipo de remocao ao sistema
             acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Atualizar_Tipo_Remocao')
             if not acesso_liberado:
                 raise BusinessException('Usuário não possui permissão para editar os dados do tipo de remoção')
+
+            # Verifica os códigos informados
+            if int(utiporemocao['tipo_remocao_id']) != tipo_remocao_id:
+                raise BusinessException('Erro na identificação do tipo da remoção')
 
             # Verifica se os campos estão preenchidos
             if utiporemocao['nome'] == '' or not utiporemocao['nome']:

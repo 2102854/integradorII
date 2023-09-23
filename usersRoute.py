@@ -35,3 +35,22 @@ def get_usuario_id(usuario_id, id:int):
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 401    
+
+# Atualiza a senha do usuario no banco de dados
+@usersRoute.route('/api/usuarios/change_password', methods=['POST'])
+@Auth.token_required
+def change_password(usuario_id):
+    try:
+        obj = request.get_json()                
+        ok = Usuario.change_password(usuario_id, obj['user_id_to_be_changed'], obj['old_pass'], obj['new_pass'], obj['new_pass_confirmed'])
+        return jsonify(changed = ok)            
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 401    
+
+"""
+@usersRoute.route('/api/usuarios/teste', methods=['GET'])  
+def teste():
+    ok = Usuario.generate_password()
+    return jsonify(changed = ok)  
+"""   

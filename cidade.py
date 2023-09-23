@@ -105,7 +105,7 @@ class Cidade(Base):
             if not acesso_liberado:
                 raise BusinessException('Usuário não Possui permissão para visualização da cidade informada')
 
-            # Retorna o grupo selecionado
+            # Retorna a cidade selecionada
             sql = select(Cidade).where(Cidade.cidade_id == cidade_id)
             cidade = session.scalars(sql).one()                         
             if not cidade:
