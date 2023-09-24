@@ -42,7 +42,7 @@ def get_usuario_id(usuario_id, id:int):
 def change_password(usuario_id):
     try:
         obj = request.get_json()                
-        ok = Usuario.change_password(usuario_id, obj['user_id_to_be_changed'], obj['old_pass'], obj['new_pass'], obj['new_pass_confirmed'])
+        ok = Usuario.change_password(usuario_id, int(obj['user_id_to_be_changed']), obj['old_pass'], obj['new_pass'], obj['new_pass_confirmed'])
         return jsonify(changed = ok)            
     except Exception as err:
         response = jsonify({'message err': f'{err}'})

@@ -78,7 +78,8 @@ class Auth():
             
             authorization = {
                 "token": token,
-                "nome" : usuario.primeiro_nome + ' ' + usuario.sobrenome,
+                "usuario_id": usuario.usuario_id,
+                "nome": usuario.primeiro_nome + ' ' + usuario.sobrenome,
                 "permissoes": permissoes,
                 "session_key": session_key             
             }

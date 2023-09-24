@@ -247,7 +247,7 @@ class Usuario (Base):
         usuario = session.scalars(sql).one()
         return usuario  
 
-    def change_password(usuario_id, user_id_to_be_changed, old_pass, new_pass, new_pass_confirmed):
+    def change_password(usuario_id, user_id_to_be_changed:int, old_pass, new_pass, new_pass_confirmed):
         try:
             # Retorna o usuário a ser alterado
             sql = select(Usuario).where(Usuario.usuario_id == user_id_to_be_changed)
