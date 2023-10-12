@@ -19,10 +19,10 @@ def get_usuarios(usuario_id):
     try:
         usuarios = Usuario.get_usuarios(usuario_id)
         u = dict_helper_list(usuarios) 
-        return jsonify(usuarios = u)            
+        return make_response(u, 200)            
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
-        return response, 401
+        return response, 401   
 
 # Recupera os dados do Usuário
 @usersRoute.route('/api/usuarios/<int:id>', methods=['GET'])
