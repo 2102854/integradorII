@@ -67,9 +67,9 @@ class Tipo_Remocao(Base):
                 acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Visualizar_Tipo_Remocao')
             if not acesso_liberado:
                 raise BusinessException('Usuário não Possui permissão para visualização do tipo de remoção informado')
-
-            # Retorna o grupo selecionado
-            tipo_remocao = session.query(Tipo_Remocao).where(Tipo_Remocao.tipo_remocao_id == tipo_remocao_id).all()
+            # Retorna a cidade selecionada
+            sql = select(Tipo_Remocao).where(Tipo_Remocao.tipo_remocao_id == tipo_remocao_id)
+            tipo_remocao = session.scalars(sql).one()                                   
             if not tipo_remocao:
                 raise BusinessException('Tipo de Remoção não encontrado')
 

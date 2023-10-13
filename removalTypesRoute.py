@@ -31,7 +31,7 @@ def get_tipo_remocao_id(usuario_id: int, tipo_remocao_id: int):
     try:
         tipo_remocao = Tipo_Remocao.get_tipo_remocao_id(usuario_id, tipo_remocao_id)
         e = dict_helper_obj(tipo_remocao)
-        return make_response(e, 200) 
+        return make_response(e, 200)          
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 404
@@ -51,7 +51,7 @@ def add_tipo_remocao(usuario_id: int):
         return response, 404
 
 # Edita um Tipod e remoção já cadastrado no Banco de Dados
-@removalTypesRoute.route('/api/tipo_remocao/update', methods=['POST'])
+@removalTypesRoute.route('/api/tipo_remocao/update/<int:tipo_remocao_id>', methods=['PUT'])
 @Auth.token_required
 def update_tipo_remocao(usuario_id: int, tipo_remocao_id: int):
     try:
@@ -63,5 +63,3 @@ def update_tipo_remocao(usuario_id: int, tipo_remocao_id: int):
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 401
-
-
