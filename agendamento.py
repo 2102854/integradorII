@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from config import parameters
 from seguranca.business_exception import BusinessException
-from seguranca.pemissoes import Permissao
+from seguranca.permissoes import Permissao
 
 from paciente import Paciente
 from hospital import Hospital

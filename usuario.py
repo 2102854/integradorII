@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.operators import ilike_op
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from seguranca.pemissoes import Permissao
+from seguranca.permissoes import Permissao
 from seguranca.usuario_permissao import Usuario_Permissao
 from seguranca.business_exception import BusinessException
 import uuid

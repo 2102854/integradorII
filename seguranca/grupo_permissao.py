@@ -7,7 +7,7 @@ from sqlalchemy import create_engine, select, and_ , or_, update
 from sqlalchemy.orm import Session
 
 from seguranca.business_exception import BusinessException
-from seguranca.pemissoes import Permissao
+from seguranca.permissoes import Permissao
 from seguranca.grupo import Grupo
 
 Base = declarative_base()

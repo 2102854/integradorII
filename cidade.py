@@ -8,7 +8,7 @@ from config import parameters
 from estado import Estado
 from pais import Pais
 from seguranca.business_exception import BusinessException
-from seguranca.pemissoes import Permissao
+from seguranca.permissoes import Permissao
 
 Base = declarative_base()
 

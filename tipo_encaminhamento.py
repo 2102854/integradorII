@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from config import parameters
 from seguranca.business_exception import BusinessException
-from seguranca.pemissoes import Permissao
+from seguranca.permissoes import Permissao
 
 Base = declarative_base()
 
@@ -74,7 +74,9 @@ class Tipo_Encaminhamento(Base):
                 raise BusinessException('Usuário não Possui permissão para visualização do tipo de encaminhamento informado')
 
             # Retorna o grupo selecionado
-            tipo_encaminhamento = session.query(Tipo_Encaminhamento).where(Tipo_Encaminhamento.tipo_encaminhamento_id == tipo_encaminhamento_id).all()
+            sql = select(Tipo_Encaminhamento).where(Tipo_Encaminhamento.tipo_encaminhamento_id == tipo_encaminhamento_id)
+            tipo_encaminhamento = session.scalars(sql).one()            
+            
             if not tipo_encaminhamento:
                 raise BusinessException('Tipo de Encaminhamento não encontrado')
 
@@ -121,12 +123,16 @@ class Tipo_Encaminhamento(Base):
 
             # Atualiza um Tipo de Encaminhamento
 
-    def update_tipo_encaminhamento(usuario_id, utipoencaminhamento):
+    def update_tipo_encaminhamento(usuario_id, tipo_encaminhamento_id, utipoencaminhamento):
         try:
             # Verifica se o usuário pode adicionar um novo tipo de remocao ao sistema
             acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Atualizar_Tipo_Encaminhamento')
             if not acesso_liberado:
                 raise BusinessException('Usuário não possui permissão para editar os dados do tipo de encaminhamento')
+            
+            # Verifica os códigos informados
+            if int(utipoencaminhamento['tipo_encaminhamento_id']) != tipo_encaminhamento_id:
+                raise BusinessException('Erro na identificação do tipo de doença')  
 
             # Verifica se os campos estão preenchidos
             if utipoencaminhamento['nome'] == '' or not utipoencaminhamento['nome']:

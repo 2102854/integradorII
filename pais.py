@@ -6,7 +6,7 @@ from sqlalchemy import create_engine, select, and_ , or_, update
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.operators import ilike_op
 
-from seguranca.pemissoes import Permissao
+from seguranca.permissoes import Permissao
 from seguranca.business_exception import BusinessException
 
 Base = declarative_base()

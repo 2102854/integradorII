@@ -8,7 +8,7 @@ from sqlalchemy.sql.operators import ilike_op
 
 from config import parameters
 from seguranca.business_exception import BusinessException
-from seguranca.pemissoes import Permissao
+from seguranca.permissoes import Permissao
 
 Base = declarative_base()
 

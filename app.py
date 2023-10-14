@@ -12,6 +12,7 @@ from flask_cors import CORS
 
 from seguranca.authRoute import authRoute
 from seguranca.groupsRoute import groupsRoute
+from seguranca.permissionsRoute import permissionsRoute
 from usersRoute import usersRoute
 from dashboardRoute import dashboardRoute
 from countriesRoute import countriesRoute
@@ -39,6 +40,7 @@ cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # blueprint register
 app.register_blueprint(authRoute)
+app.register_blueprint(permissionsRoute)
 app.register_blueprint(dashboardRoute)
 app.register_blueprint(countriesRoute)
 app.register_blueprint(statesRoute)

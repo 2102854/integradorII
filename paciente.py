@@ -11,7 +11,7 @@ from calendar import monthrange
 from config import parameters
 from cidade import Cidade
 from seguranca.business_exception import BusinessException
-from seguranca.pemissoes import Permissao
+from seguranca.permissoes import Permissao
 
 Base = declarative_base()
 
