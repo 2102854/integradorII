@@ -81,3 +81,28 @@ class Permissao (Base):
         except Exception:
             # tratamento de erro desconhecido
             return Exception('Erro desconhecido')    
+
+    # Retorna todas as permissoes de um usuários do sistema
+    def get_permissoes_usuario(usuario_id, id):
+        try:
+            # Verifica se o usuário pode ver o conteúdo da tabela usuário
+            acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Atualizar_Usuarios')
+            
+            if not acesso_liberado:
+                acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Editar_Grupo')
+            
+            if not acesso_liberado:                
+                raise BusinessException('Usuário não possui permissão para visualização da lista de permissões')
+            
+            permissoes = (
+                session.query(Permissao)
+                .join(Usuario_Permissao, Permissao.permissao_id == Usuario_Permissao.permissao_id)\
+                .where(Usuario_Permissao.usuario_id == id)
+                .order_by(Permissao.permissao_id).all())  
+
+            return permissoes 
+        except BusinessException as err:
+            raise Exception(err)
+        except Exception:
+            # tratamento de erro desconhecido
+            return Exception('Erro desconhecido')           
