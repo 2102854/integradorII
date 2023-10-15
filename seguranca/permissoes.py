@@ -5,14 +5,13 @@ from config import parameters
 from sqlalchemy import  Column
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.sqlite import (BLOB, BOOLEAN, CHAR, DATE, DATETIME, DECIMAL, FLOAT, INTEGER, NUMERIC, JSON, SMALLINT, TEXT, TIME, TIMESTAMP, VARCHAR)
-from sqlalchemy import create_engine, func
+from sqlalchemy import create_engine, func, and_
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.operators import ilike_op
 
 from seguranca.usuario_permissao import Usuario_Permissao
 from seguranca.business_exception import BusinessException
-
 
 Base = declarative_base()
 

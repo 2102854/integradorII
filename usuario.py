@@ -3,7 +3,7 @@ from config import parameters
 from sqlalchemy import  Column
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.sqlite import (BOOLEAN, INTEGER, TEXT, VARCHAR)
-from sqlalchemy import create_engine, func
+from sqlalchemy import create_engine, and_
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.operators import ilike_op
@@ -304,3 +304,50 @@ class Usuario (Base):
             .where(Usuario_Permissao.usuario_id == usuario_id)\
             .order_by(Permissao.permissao).all()
         return permissoes    
+
+    # Altera a permissao do usuário
+    def change_user_permission(usuario_id, user_id, permissao_id):
+        try:
+            # Verifica se o usuário pode ver o conteúdo da tabela usuário
+            acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Atualizar_Usuarios')
+            
+            if not acesso_liberado:
+                acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Editar_Grupo')
+            
+            if not acesso_liberado:                
+                raise BusinessException('Usuário não possui permissão para alterar as permissões de usuários')
+            
+            # Verifica se o usuário existe
+            rows = session.query(Usuario).where(Usuario.usuario_id == user_id).count()   
+            if rows != 1:
+                raise BusinessException('Usuário informado não existe')            
+            
+            # Verifica se a permissão existe
+            rows = session.query(Permissao).where(Permissao.permissao_id == permissao_id).count()   
+            if rows != 1:
+                raise BusinessException('Permissão informada não existe')  
+                        
+            # Verifica se o usuário possui a permissão informadada 
+            try:
+                sql = (
+                    select(Usuario_Permissao)
+                    .where(
+                        and_(
+                            Usuario_Permissao.permissao_id == permissao_id,
+                            Usuario_Permissao.usuario_id == user_id
+                        )
+                    )
+                )                           
+                p = session.scalars(sql).one()                                    
+                session.delete(p)
+            except Exception:
+                newPermission = Usuario_Permissao(user_id, permissao_id)
+                session.add(newPermission) 
+            finally:                
+                session.commit()
+            return 'ok'
+        except BusinessException as err:
+            raise Exception(err)
+        except Exception as e:
+            # tratamento de erro desconhecido
+            return Exception('Erro desconhecido')            

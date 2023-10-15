@@ -48,9 +48,14 @@ def change_password(usuario_id):
         response = jsonify({'message err': f'{err}'})
         return response, 401    
 
-"""
-@usersRoute.route('/api/usuarios/teste', methods=['GET'])  
-def teste():
-    ok = Usuario.generate_password()
-    return jsonify(changed = ok)  
-"""   
+# Atualiza a permissao do usuario
+@usersRoute.route('/api/usuarios/change_user_permission', methods=['POST'])
+@Auth.token_required
+def change_user_permission(usuario_id):
+    try:
+        obj = request.get_json()                
+        ok = Usuario.change_user_permission(usuario_id, int(obj['user_id']), obj['permissao_id'])
+        return jsonify(changed = ok)            
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 401 
