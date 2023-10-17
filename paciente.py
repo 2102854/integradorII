@@ -1,3 +1,4 @@
+from config import parameters
 from sqlalchemy import Column
 from sqlalchemy import create_engine, select, and_, func
 from sqlalchemy.dialects.sqlite import (INTEGER, VARCHAR, DATETIME)
@@ -6,6 +7,7 @@ from sqlalchemy.orm import Session
 from config import parameters
 
 from datetime import datetime, timedelta 
+import pytz
 from calendar import monthrange
 
 from config import parameters
@@ -215,7 +217,8 @@ class Paciente(Base):
                 numero = apaciente['numero'].strip(),
                 complemento = apaciente['complemento'].upper().strip(),
                 cep = apaciente['cep'].strip(),
-                hygia = apaciente['hygia'].upper().strip()
+                hygia = apaciente['hygia'].upper().strip(),
+                data_cadastro = datetime.now(pytz.timezone(parameters['TIMEZONE']))
             )
 
             # Adiciona um novo Paciente
@@ -259,7 +262,7 @@ class Paciente(Base):
             if upaciente['hygia'] == '' or not upaciente['hygia']:
                 raise BusinessException('Hygia do Paciente é obrigatório')
 
-                # Recupera os dados do Paciente informado
+            # Recupera os dados do Paciente informado
             sql = select(Paciente).where(Paciente.paciente_id == upaciente['paciente_id'])
             paciente = session.scalars(sql).one()
             if not paciente:
@@ -279,6 +282,14 @@ class Paciente(Base):
             # Atualiza o objeto a ser alterado
             paciente.nome = upaciente['nome'].upper().strip()
             paciente.hygia = upaciente['hygia'].upper().strip()
+            paciente.tel_1 = upaciente['tel_1'].upper().strip()
+            paciente.tel_2 = upaciente['tel_2'].upper().strip()
+            paciente.cidade_id = upaciente['cidade_id']
+            paciente.data_nasc = upaciente['data_nasc']
+            paciente.logradouro = upaciente['logradouro'].upper().strip()
+            paciente.numero = upaciente['numero'].upper().strip()
+            paciente.complemento = upaciente['complemento'].upper().strip(),
+            paciente.cep = upaciente['cep'].strip(),
 
             # Comita as alterações no banco de dados
             session.commit()
