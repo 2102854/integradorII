@@ -1,0 +1,7 @@
+# Ignore a pasta node_modules
+__pycache__
+.vscode
+Include
+lib
+Scripts
+pyvenv.cfg

@@ -6,7 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
 from config import parameters
 
-from datetime import datetime, timedelta 
+from datetime import datetime, time
 import pytz
 from calendar import monthrange
 
@@ -76,6 +76,19 @@ class Paciente(Base):
             "hygia":self.hygia,
             "data_cadastro":self.data_cadastro 
         }
+        
+    def formata_data(d):
+        # 1993-12-01T02:00:00.000Z
+        r = []
+        s1 = str(d).split('T')
+        d1 = s1[0].split('-')
+        
+        for x in d1:
+            r.append(int(x))
+        dt = datetime(r[0], r[1], r[2])
+        return dt 
+           
+         
     # Retorna o total de pacientes cadastrados no sistema
     def get_total_pacientes(usuario_id):
         # Verifica se o usuário pode ver o conteúdo da tabela de pacientes
@@ -206,19 +219,19 @@ class Paciente(Base):
                 )).count()
             if rows > 0:
                 raise BusinessException('Paciente já cadastrado com este número hygia')
-
+            
             novoPaciente = Paciente(
                 cidade_id=apaciente['cidade_id'],
                 nome=apaciente['nome'].upper().strip(),
-                data_nasc = apaciente['data_nasc'].strip(),
-                tel_1 = apaciente['tel_1'].strip(),
-                tel_2 = apaciente['tel_2'].strip(),
+                data_nasc = Paciente.formata_data(apaciente['data_nasc']),
+                tel_1 = apaciente['tel_1'],
+                tel_2 = apaciente['tel_2'],
                 logradouro = apaciente['logradouro'].upper().strip(),
-                numero = apaciente['numero'].strip(),
+                numero = apaciente['numero'].upper().strip(),
                 complemento = apaciente['complemento'].upper().strip(),
                 cep = apaciente['cep'].strip(),
                 hygia = apaciente['hygia'].upper().strip(),
-                data_cadastro = datetime.now(pytz.timezone(parameters['TIMEZONE']))
+                data_cadastro =  Paciente.formata_data(datetime.isoformat(datetime.now(pytz.timezone(parameters['TIMEZONE']))))
             )
 
             # Adiciona um novo Paciente
@@ -282,8 +295,8 @@ class Paciente(Base):
             # Atualiza o objeto a ser alterado
             paciente.nome = upaciente['nome'].upper().strip()
             paciente.hygia = upaciente['hygia'].upper().strip()
-            paciente.tel_1 = upaciente['tel_1'].upper().strip()
-            paciente.tel_2 = upaciente['tel_2'].upper().strip()
+            paciente.tel_1 = upaciente['tel_1']
+            paciente.tel_2 = upaciente['tel_2']
             paciente.cidade_id = upaciente['cidade_id']
             paciente.data_nasc = upaciente['data_nasc']
             paciente.logradouro = upaciente['logradouro'].upper().strip()

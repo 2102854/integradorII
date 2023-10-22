@@ -20,7 +20,8 @@ def get_hospitais(usuario_id: int):
     try:
         hospital = Hospital.get_hospitais(usuario_id)
         e = dict_helper_list(hospital)
-        return jsonify(hospital = e)
+        return make_response(e, 200)    
+    
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 404
@@ -32,7 +33,7 @@ def get_hospital_id(usuario_id: int, hospital_id: int):
     try:
         hospital = Hospital.get_hospital_id(usuario_id, hospital_id)
         e = dict_helper_list(hospital)
-        return jsonify(hospital = e)
+        return make_response(e, 200)
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 404

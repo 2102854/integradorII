@@ -45,7 +45,7 @@ def add_paciente():
         # Recupera o objeto passado como parametro
         apaciente = request.get_json()
         paciente = Paciente.add_paciente(usuario_id, apaciente)
-        c = dict_helper_obj(paciente)
+        c = 'ok'#dict_helper_obj(paciente)
         return jsonify(paciente = c)
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
