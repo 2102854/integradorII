@@ -113,6 +113,20 @@ class Paciente(Base):
             total = session.query(func.count(Paciente.paciente_id)).filter(Paciente.data_cadastro.between(inicio_mes, fim_mes)).scalar()
             return total  
     
+    def get_pac(usuario_id):
+        try:
+            # Verifica se o usuário pode ver o conteúdo da tabela de hospitais
+            acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Visualizar_Pacientes')
+            if not acesso_liberado:
+                raise BusinessException('Usuário não Possui permissão para visualização dos hospitais')
+            pacientes = session.query(Paciente).all()
+            return pacientes
+                    
+        except BusinessException as err:
+            raise Exception(err)
+        except Exception:
+            return Exception('Erro desconhecido')  
+                  
     def get_pacientes(usuario_id):
         try:
             # Verifica se o usuário pode ver o conteúdo da tabela de pacientes

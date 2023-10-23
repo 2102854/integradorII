@@ -38,7 +38,6 @@ class Agendamento(Base):
     tipo_remocao_id = Column(INTEGER)
     hospital_id = Column(INTEGER)
     veiculo_id = Column(INTEGER)
-    usuario_id = Column(INTEGER)
     motorista_id = Column(INTEGER)
     responsavel_pac = Column(VARCHAR(250))
     data_remocao = Column(DATETIME)
@@ -47,6 +46,7 @@ class Agendamento(Base):
     custo_ifd = Column(FLOAT)
     custo_estadia = Column(FLOAT)
     estado_geral_paciente = Column(VARCHAR(250))
+    usuario_id = Column(INTEGER)
 
     # Método de Representação
     def __repr__(self) -> str:
@@ -96,6 +96,23 @@ class Agendamento(Base):
             "custo_estadia": self.custo_estadia,
             "estado_geral_paciente": self.estado_geral_paciente
         }
+        
+    # Formata data para comparação
+    def formata_data(d):
+        r = []
+        s1 = str(d).split('T')
+        d1 = s1[0].split('-')
+        
+        for x in d1:
+            r.append(int(x))
+
+        t1 = s1[1].split(':')
+        ss = t1[2].split('.')
+        r.append(int(t1[0]))
+        r.append(int(t1[1]))
+        r.append(int(ss[0]))
+        dt = datetime(r[0], r[1], r[2], r[3], r[4], r[5])
+        return dt         
 
     # Retorna o total de pacientes cadastrados no sistema
     def get_total_agendamento(usuario_id):
@@ -252,17 +269,18 @@ class Agendamento(Base):
             if aagendamento['responsavel_pac'] == '' or not aagendamento['responsavel_pac']:
                 raise BusinessException('responsável pelo Paciente é obrigatório')
 
-            if aagendamento['usuario_id'] == '' or not aagendamento['usuario_id']:
-                raise BusinessException('Usuário é obrigatório')
-
             if aagendamento['motorista_id'] == '' or not aagendamento['motorista_id']:
                 raise BusinessException('Motorista é obrigatório')
 
             if aagendamento['data_remocao'] == '' or not aagendamento['data_remocao']:
                 raise BusinessException('Data de remoção do Paciente é obrigatória')
+            else:
+                aagendamento['data_remocao'] = Agendamento.formata_data(aagendamento['data_remocao'])
 
             if aagendamento['saida_prevista'] == '' or not aagendamento['saida_prevista']:
                 raise BusinessException('Saida prevista do Paciente é obrigatória')
+            else:
+                aagendamento['saida_prevista'] = Agendamento.formata_data(aagendamento['saida_prevista'])            
 
             if aagendamento['observacao'] == '' or not aagendamento['observacao']:
                 raise BusinessException('Observção é obrigatória')
@@ -278,7 +296,8 @@ class Agendamento(Base):
             if not paciente:
                 raise BusinessException('Paciente informado não está cadastrado')
 
-            novoAgendamento = Agendamento(
+            novoAgendamento = Agendamento (
+                agendamento_id = None,
                 paciente_id=aagendamento['paciente_id'],
                 tipo_encaminhamento_id=aagendamento['tipo_encaminhamento_id'],
                 tipo_doenca_id=aagendamento['tipo_doenca_id'],
@@ -287,13 +306,13 @@ class Agendamento(Base):
                 veiculo_id=aagendamento['veiculo_id'],
                 responsavel_pac=aagendamento['responsavel_pac'].upper().strip(),
                 estado_geral_paciente=aagendamento['estado_geral_paciente'].upper().strip(),
-                usuario_id=aagendamento['usuario_id'],
                 motorista_id=aagendamento['motorista_id'],
-                observacao = aagendamento['observacao'].upper().strip(),
-                data_remocao = aagendamento['data_remocao'].strip(),
-                saida_prevista=aagendamento['saida_prevista'].strip(),
+                observacao = aagendamento['observacao'].upper(),
+                data_remocao = aagendamento['data_remocao'],
+                saida_prevista=aagendamento['saida_prevista'],
                 custo_ifd = aagendamento['custo_ifd'],
-                custo_estadia=aagendamento['custo_estadia']
+                custo_estadia=aagendamento['custo_estadia'],
+                usuario_id = usuario_id
             )
 
             # Adiciona um novo Paciente
