@@ -51,7 +51,7 @@ def add_tipoDoenca(usuario_id: int):
         return response, 404 
 
 # Edita um tipo de doença já cadastrado no Banco de Dados
-@diseaseTypesRoute.route('/api/disease_types/<int:tipo_doenca_id>', methods=['PUT'])
+@diseaseTypesRoute.route('/api/disease_types/update/<int:tipo_doenca_id>', methods=['PUT'])
 @Auth.token_required
 def update_tipoDoenca(usuario_id: int, tipo_doenca_id: int):
     try:

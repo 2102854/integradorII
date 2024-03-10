@@ -125,9 +125,9 @@ class Tipo_Doenca (Base):
             if utipoDoenca['nome'] == '' or not utipoDoenca['nome']:
                 raise BusinessException('Nome do tipo de doença é obrigatório')
 
-            # Recupera os dados do tipo de doença informado
-            sql = select(Tipo_Doenca).where(Tipo_Doenca.tipo_doenca_id == utipoDoenca['tipo_doenca_id'])
-            tipoDoenca = session.scalar(sql).one()
+            # Recupera os dados do tipo de doença informado                           
+            sql = select(Tipo_Doenca).where(Tipo_Doenca.tipo_doenca_id == int(utipoDoenca['tipo_doenca_id']))
+            tipoDoenca = session.scalars(sql).one()
             if not tipoDoenca:
                 raise BusinessException('Tipo de doença não encontrado')
 

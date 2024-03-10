@@ -137,13 +137,17 @@ class Hospital(Base):
 
             # Atualiza um Hospital Existente
 
-    def update_hospital(usuario_id, uhospital):
+    def update_hospital(usuario_id: int, hospital_id: int,  uhospital):
         try:
             # Verifica se o usuário pode adicionar um novo pais ao sistema
             acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Atualizar_Hospitais')
             if not acesso_liberado:
                 raise BusinessException('Usuário não possui permissão para editar os dados do hospital')
 
+            # Verifica os códigos informados
+            if int(uhospital['hospital_id']) != hospital_id:
+                raise BusinessException('Erro na identificação do hospital')   
+            
             # Verifica se os campos estão preenchidos
             if uhospital['endereco_id'] == '' or not uhospital['endereco_id']:
                 raise BusinessException('O endereço é obrigatório')
@@ -151,13 +155,13 @@ class Hospital(Base):
             if uhospital['nome'] == '' or not uhospital['nome']:
                 raise BusinessException('Nome do hospital é obrigatório')
 
-                # Recupera os dados do hospital informado
-            sql = select(Hospital).where(Hospital.hospital_id == uhospital['hospital_id'])
+            # Recupera os dados do hospital informado
+            sql = select(Hospital).where(Hospital.hospital_id == int(uhospital['hospital_id']))
             hospital = session.scalars(sql).one()
             if not hospital:
                 raise BusinessException('Hospital informado não encontrado')
 
-                # Verifica se o nome do Hospital foi alterado.
+            # Verifica se o nome do Hospital foi alterado.
             # Se sim, precisa checar se já existe um cadastrado no sistema
             if hospital.nome != uhospital['nome']:
                 rows = session.query(Hospital).where(

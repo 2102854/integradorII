@@ -133,13 +133,17 @@ class Motorista(Base):
 
             # Atualiza um Motorista Existente
 
-    def update_motorista(usuario_id, umotorista):
+    def update_motorista(usuario_id: int, motorista_id: int, umotorista):
         try:
             # Verifica se o usuário pode adicionar um novo motorista ao sistema
             acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Atualizar_Motoristas')
             if not acesso_liberado:
                 raise BusinessException('Usuário não possui permissão para editar os dados do motorista')
 
+            # Verifica os códigos informados
+            if int(umotorista['motorista_id']) != motorista_id:
+                raise BusinessException('Erro na identificação do motorista')
+            
             # Verifica se os campos estão preenchidos
             if umotorista['nome'] == '' or not umotorista['nome']:
                 raise BusinessException('O nome é obrigatório')

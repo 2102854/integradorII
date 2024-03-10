@@ -167,8 +167,8 @@ class Cidade(Base):
                 pais_id = acidade['pais_id'],
                 estado_id = acidade['estado_id'],
                 nome = acidade['nome'].upper().strip(),
-                distancia_km = float(acidade['distancia_km'].strip()),
-                valor_pedagio = float(acidade['valor_pedagio'].strip())
+                distancia_km = float(acidade['distancia_km']),
+                valor_pedagio = float(acidade['valor_pedagio'])
             )
 
             # Adiciona uma nova Cidade

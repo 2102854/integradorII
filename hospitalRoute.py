@@ -51,3 +51,17 @@ def add_hospital(usuario_id: int):
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 404
+    
+# Edita um Hospital já cadastrado no Banco de Dados
+@hospitalRoute.route('/api/hospitais/update/<int:hospital_id>', methods=['PUT'])
+@Auth.token_required
+def update_hospital(usuario_id: int, hospital_id: int):
+    try:
+        # Recupera o objeto passado como parametro
+        uhospital = request.get_json()
+        hospital = Hospital.update_hospital(usuario_id, hospital_id, uhospital)
+        h = dict_helper_obj(hospital)
+        return jsonify(hospital = h)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 401    

@@ -1,4 +1,4 @@
-# Projeto integrador 2
+# Projeto integrador 3
 # Grupo 5
 
 # OBSERVAÇÕES GERAIS
@@ -8,6 +8,7 @@
 import locale
 
 from flask import Flask
+from flask import request, jsonify, make_response
 from flask_cors import CORS 
 
 from seguranca.authRoute import authRoute
@@ -27,6 +28,20 @@ from disease_typesRoute import diseaseTypesRoute
 from patient_referralRoute import patient_referralRoute
 from schedulingRoute import schedulingRoute
 
+
+import os
+os.environ["JAVA_HOME"] ="C:\Progra~1\Java\jdk-21"
+from pyreportjasper import PyReportJasper
+from flask import send_file,  send_from_directory
+
+"""
+import argparse
+import io
+import os
+import sys
+from rlextra.rml2pdf import rml2pdf
+
+"""
 """
 Config App
 """
@@ -62,3 +77,29 @@ locale.setlocale( locale.LC_ALL,'pt_BR.UTF-8' )
 @app.route("/")
 def index():
     return None
+
+"""
+@app.route("/r1")
+def r1():
+    with open("./rml/test01.rml", "r") as rml:
+        rml2pdf.go(rml.read(), "./rml/test01.pdf")
+        rml.close()
+    return send_from_directory('./rml', 'test01.pdf')
+"""
+@app.route("/r1")
+def r1():
+    
+    REPORTS_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'reports')
+    input_file = os.path.join(REPORTS_DIR, 'Invoice.jrxml')
+    output_file = os.path.join(REPORTS_DIR, 'Invoice')
+    pyreportjasper = PyReportJasper()
+    pyreportjasper.config(
+        input_file,
+        output_file,
+        output_formats=["pdf"]
+    )
+    pyreportjasper.process_report()
+
+    if os.path.isfile(output_file):
+        print('Report generated successfully!')    
+    return send_from_directory('./reports', 'Invoice.pdf')
