@@ -45,22 +45,22 @@ def add_veiculo(usuario_id: int):
         # Recupera o objeto passado como parametro
         aveiculo = request.get_json()
         veiculo = Veiculo.add_veiculo(usuario_id, aveiculo)
-        c = dict_helper_obj(veiculo)
-        return jsonify(veiculo = c)
+        v = dict_helper_obj(veiculo)
+        return jsonify(veiculo = v)
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 404
 
 # Edita um Veículo já cadastrado no Banco de Dados
-@vehiclesRoute.route('/api/veiculos/update', methods=['POST'])
+@vehiclesRoute.route('/api/veiculos/update/<int:veiculo_id>', methods=['PUT'])
 @Auth.token_required
-def update_veiculo(usuario_id: int):
+def update_veiculo(usuario_id: int, veiculo_id: int):
     try:
-        # Recupera o objeto passado como parametro
+        # Recupera o objeto passado como parametroCD SCRIPTS
         uveiculo = request.get_json()
-        veiculo = Veiculo.update_veiculo(usuario_id, uveiculo)
-        p = dict_helper_obj(veiculo)
-        return jsonify(veiculo = p)
+        veiculo = Veiculo.update_veiculo(usuario_id, veiculo_id, uveiculo)
+        v = dict_helper_obj(veiculo)
+        return jsonify(veiculo = v)
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
-        return response, 401    
+        return response, 401     

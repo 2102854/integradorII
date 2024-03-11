@@ -25,41 +25,38 @@ def get_pacientes(usuario_id: int):
 
 # Recupera o paciente pelo id
 @patientsRoute.route('/api/pacientes/<int:paciente_id>', methods=['GET'])
-##@Auth.token_required
-def get_paciente_id(paciente_id: int):
+@Auth.token_required
+def get_paciente_id(usuario_id: int, paciente_id: int):
     try:
-        usuario_id = 1
         paciente = Paciente.get_paciente_id(usuario_id, paciente_id)
-        e = dict_helper_list(paciente)
-        return jsonify(paciente = e)
+        p = dict_helper_list(paciente)
+        return jsonify(paciente = p)
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 404
 
 # Adiciona um Veículo no Banco de Dados
 @patientsRoute.route('/api/pacientes/add', methods=['POST'])
-##@Auth.token_required
-def add_paciente():
+@Auth.token_required
+def add_paciente(usuario_id: int):
     try:
-        usuario_id = 1
         # Recupera o objeto passado como parametro
         apaciente = request.get_json()
         paciente = Paciente.add_paciente(usuario_id, apaciente)
-        c = 'ok'#dict_helper_obj(paciente)
-        return jsonify(paciente = c)
+        p = dict_helper_obj(paciente)
+        return jsonify(paciente = p)
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 404
 
 # Edita um Paciente já cadastrado no Banco de Dados
-@patientsRoute.route('/api/pacientes/update', methods=['POST'])
-#@Auth.token_required
-def update_paciente():
+@patientsRoute.route('/api/pacientes/update/<int:paciente_id>', methods=['PUT'])
+@Auth.token_required
+def update_paciente(usuario_id: int, paciente_id: int):
     try:
-        usuario_id = 1
         # Recupera o objeto passado como parametro
         upaciente = request.get_json()
-        paciente = Paciente.update_paciente(usuario_id, upaciente)
+        paciente = Paciente.update_paciente(usuario_id, paciente_id, upaciente)
         p = dict_helper_obj(paciente)
         return jsonify(paciente = p)
     except Exception as err:

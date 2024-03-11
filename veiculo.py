@@ -90,7 +90,9 @@ class Veiculo(Base):
                 raise BusinessException('Usuário não Possui permissão para visualização do veículo informado')
 
             # Retorna o grupo selecionado
-            veiculo = session.query(Veiculo).where(Veiculo.veiculo_id == veiculo_id).all()
+            sql = select(Veiculo).where(Veiculo.veiculo_id == veiculo_id)
+            veiculo = session.scalars(sql).one()
+            #veiculo = session.query(Veiculo).where(Veiculo.veiculo_id == veiculo_id)
             if not veiculo:
                 raise BusinessException('Veículo não encontrado')
 
@@ -133,8 +135,8 @@ class Veiculo(Base):
             novoVeiculo = Veiculo(
                 modelo = aveiculo['modelo'].upper().strip(),
                 placa = aveiculo['placa'].upper().strip(),
-                capacidade = aveiculo['capacidade'].strip(),
-                media_consumo = aveiculo['media_consumo'].strip()
+                capacidade = aveiculo['capacidade'],
+                media_consumo = aveiculo['media_consumo']
             )
             
             # Adiciona um novo Veículo
@@ -148,13 +150,17 @@ class Veiculo(Base):
             return Exception('Erro desconhecido')
 
     # Atualiza um Veículo Existente
-    def update_veiculo(usuario_id, uveiculo):
+    def update_veiculo(usuario_id: int, veiculo_id: int, uveiculo):
         try:
-            # Verifica se o usuário pode adicionar um novo veículo ao sistema
+            # Verifica se o usuário pode atualizar veículo ao sistema
             acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Atualizar_Veiculos')
             if not acesso_liberado:
                 raise BusinessException('Usuário não possui permissão para editar os dados do veículo')
-
+            
+            # Verifica os códigos informados
+            if int(uveiculo['veiculo_id']) != veiculo_id:
+                raise BusinessException('Erro na identificação do veículo')
+                        
             # Verifica se os campos estão preenchidos
             if uveiculo['modelo'] == '' or not uveiculo['modelo']:
                 raise BusinessException('O modelo é obrigatório')
@@ -185,8 +191,8 @@ class Veiculo(Base):
                     raise BusinessException('Placa informada já cadastrada para outro veículo')
 
             # Atualiza o objeto a ser alterado
-            veiculo.modelo = uveiculo['modelo']
-            veiculo.placa = uveiculo['placa']
+            veiculo.modelo = uveiculo['modelo'].upper().strip()
+            veiculo.placa = uveiculo['placa'].upper().strip()
             veiculo.capacidade = uveiculo['capacidade']
             veiculo.media_consumo = uveiculo['media_consumo']
 

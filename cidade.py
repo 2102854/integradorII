@@ -52,7 +52,7 @@ class Cidade(Base):
             "valor_pedagio": self.valor_pedagio
         }
 
-    # Retorna os estados cadastrados
+    # Retorna os cidades cadastradas
     def get_cidades(usuario_id):
         try:            
             # Verifica se o usuário pode ver o conteúdo da tabela países
@@ -96,7 +96,7 @@ class Cidade(Base):
         Utiliza a permissão do método que a chamou
         """
         try:
-            # Verifica se o usuário pode ver o conteúdo da tabela estado
+            # Verifica se o usuário pode ver o conteúdo da tabela cidade
             acesso_liberado = False
             if permissao_pai:
                 acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, permissao_pai)
@@ -141,10 +141,10 @@ class Cidade(Base):
             if float(acidade['valor_pedagio']) < 0 : #or not float(acidade['valor_pedagio'])
                 raise BusinessException('O valor do pedágio é obrigatório')
 
-            # Verifica se o estado informado existe no sistema
+            # Verifica se o cidade informada existe no estado
             estado = Estado.get_estado_id(usuario_id, acidade['estado_id'], 'Pode_Criar_Cidade')
             if not estado:
-                raise BusinessException('Estado informado não está cadastrado')
+                raise BusinessException('Cidade informada não está cadastrada')
 
             # Verifica se já existe uma cidade cadastrada no banco de dados
             rows = session.query(Cidade).where(
@@ -185,7 +185,7 @@ class Cidade(Base):
 
     def update_cidade(usuario_id, cidade_id, ucidade):
         try:
-            # Verifica se o usuário pode adicionar um novo estado ao sistema
+            # Verifica se o usuário pode atualizar cidade no sistema
             acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Atualizar_Cidades')
             if not acesso_liberado:
                 raise BusinessException('Usuário não possui permissão para editar os dados da cidade')
@@ -237,8 +237,8 @@ class Cidade(Base):
             cidade.nome = ucidade['nome'].upper().strip()
             cidade.estado_id = ucidade['estado_id']
             cidade.pais_id = ucidade['pais_id']
-            cidade.distancia_km = ucidade['distancia_km'].strip()
-            cidade.valor_pedagio = ucidade['valor_pedagio'].strip()
+            cidade.distancia_km = ucidade['distancia_km']
+            cidade.valor_pedagio = ucidade['valor_pedagio']
 
             # Comita as alterações no banco de dados
             session.commit()

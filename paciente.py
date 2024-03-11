@@ -260,12 +260,16 @@ class Paciente(Base):
 
             # Atualiza um Paciente Existente
 
-    def update_paciente(usuario_id, upaciente):
+    def update_paciente(usuario_id: int, paciente_id: int, upaciente):
         try:
             # Verifica se o usuário pode adicionar um novo paciente ao sistema
             acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Atualizar_Pacientes')
             if not acesso_liberado:
                 raise BusinessException('Usuário não possui permissão para editar os dados do Paciente')
+
+            # Verifica os códigos informados
+            if int(upaciente['paciente_id']) != paciente_id:
+                raise BusinessException('Erro na identificação do paciente')
 
             # Verifica se os campos estão preenchidos
             if upaciente['cidade_id'] == '' or not upaciente['cidade_id']:
@@ -312,14 +316,18 @@ class Paciente(Base):
             paciente.tel_1 = upaciente['tel_1']
             paciente.tel_2 = upaciente['tel_2']
             paciente.cidade_id = upaciente['cidade_id']
-            paciente.data_nasc = upaciente['data_nasc']
+            paciente.data_nasc = Paciente.formata_data(upaciente['data_nasc'])
             paciente.logradouro = upaciente['logradouro'].upper().strip()
             paciente.numero = upaciente['numero'].upper().strip()
-            paciente.complemento = upaciente['complemento'].upper().strip(),
-            paciente.cep = upaciente['cep'].strip(),
+            paciente.complemento = upaciente['complemento'].upper().strip()
+            paciente.cep = upaciente['cep'].strip()
 
             # Comita as alterações no banco de dados
             session.commit()
+            
+            paciente.data_nasc = datetime.isoformat(paciente.data_nasc)
+            paciente.data_cadastro = datetime.isoformat(paciente.data_cadastro)
+            
             return paciente
 
         except BusinessException as err:
