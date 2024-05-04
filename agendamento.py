@@ -81,20 +81,20 @@ class Agendamento(Base):
     def obj_to_dict(self):
         return {
             "agendamento_id": int(self.agendamento_id),
-            "paciente_id": int(self.paciente_id),
-            "tipo_encaminhamento_id": int(self.tipo_encaminhamento_id),
-            "tipo_doenca_id": int(self.tipo_doenca_id),
-            "tipo_remocao_id": int(self.tipo_remocao_id),
+            "paciente_id": int(self.paciente_id),#ok
+            "tipo_encaminhamento_id": int(self.tipo_encaminhamento_id),#ok
+            "tipo_doenca_id": int(self.tipo_doenca_id),#ok
+            "tipo_remocao_id": int(self.tipo_remocao_id),#ok
             "hospital_id": int(self.hospital_id),
             "veiculo_id": int(self.veiculo_id),
-            "motorista_id": int(self.motorista_id),
-            "responsavel_pac": self.responsavel_pac,
-            "data_remocao": str(self.data_remocao),
-            "saida_prevista": str(self.saida_prevista),            
-            "observacao": self.observacao,
-            "custo_ifd": self.custo_ifd,
-            "custo_estadia": self.custo_estadia,
-            "estado_geral_paciente": self.estado_geral_paciente
+            "motorista_id": int(self.motorista_id),#ok
+            "responsavel_pac": self.responsavel_pac,#ok
+            "data_remocao": str(self.data_remocao),#ok
+            "saida_prevista": str(self.saida_prevista),  #ok          
+            "observacao": self.observacao,#ok
+            "custo_ifd": self.custo_ifd,#ok
+            "custo_estadia": self.custo_estadia,#ok
+            "estado_geral_paciente": self.estado_geral_paciente #ok
         }
         
     # Formata data para comparação
@@ -131,9 +131,11 @@ class Agendamento(Base):
         if not acesso_liberado:
             return listAgendamentos
         else:           
-            agendamentos = (session.query(Agendamento, Paciente, Hospital,Tipo_Encaminhamento )
+            agendamentos = (session.query(Agendamento, Paciente, Hospital)
+                #.join(Agendamento, Agendamento.agendamento_id == Agendamento.agendamento_id)            
                 .join(Paciente, Agendamento.paciente_id == Paciente.paciente_id)
                 .join(Hospital, Agendamento.hospital_id == Hospital.hospital_id)
+                #.join(Tipo_Encaminhamento, Agendamento.tipo_encaminhamento_id == Agendamento.tipo_encaminhamento_id)
                 .order_by(Agendamento.agendamento_id.desc()).limit(10).all()
             )
             
@@ -144,7 +146,8 @@ class Agendamento(Base):
                     "data_nascimento": datetime.isoformat(agendamento.Paciente.data_nasc),
                     "data_remocao": datetime.isoformat(agendamento.Agendamento.data_remocao),
                     "hospital": agendamento.Hospital.nome
-                }   
+                }
+                print(ag)   
                 listAgendamentos.append(ag)   
 
         return listAgendamentos
@@ -239,6 +242,38 @@ class Agendamento(Base):
             raise Exception(err)
         except Exception:
             return Exception('Erro desconhecido')
+        
+
+            # Retorna o Paciente informado
+    def get_agendamentos_id(usuario_id, agendamento_id, permissao_pai: str = None):
+        """
+        Este método utiliza um conceito de permissão pai, quando invocado por uma outra classe.
+        Facilita para não ter que dar outras permissões para o usuário
+        Utiliza a permissão do método que a chamou
+        """
+        try:
+            # Verifica se o usuário pode ver o conteúdo da tabela Paciente
+            acesso_liberado = False
+            if permissao_pai:
+                acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, permissao_pai)
+            else:
+                acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Visualizar_Pacientes')
+            if not acesso_liberado:
+                raise BusinessException('Usuário não Possui permissão para visualização do Paciente informado')
+
+            # Retorna o grupo selecionado
+            sql = select(Agendamento).where(Agendamento.agendamento_id == agendamento_id)
+            agendamento = session.scalars(sql).one()
+
+            if not agendamento:
+                raise BusinessException('Agendamento não encontrado')
+
+            return agendamento
+
+        except BusinessException as err:
+            raise Exception(err)
+        except Exception:
+            return Exception('Erro desconhecido')
 
     def add_agendamento(usuario_id, aagendamento):
         try:
@@ -304,15 +339,15 @@ class Agendamento(Base):
                 tipo_remocao_id=aagendamento['tipo_remocao_id'],
                 hospital_id=aagendamento['hospital_id'],
                 veiculo_id=aagendamento['veiculo_id'],
-                responsavel_pac=aagendamento['responsavel_pac'].upper().strip(),
-                estado_geral_paciente=aagendamento['estado_geral_paciente'].upper().strip(),
+                responsavel_pac=aagendamento['responsavel_pac'].upper().strip(),#ok
+                estado_geral_paciente=aagendamento['estado_geral_paciente'].upper().strip(),#ok
                 motorista_id=aagendamento['motorista_id'],
-                observacao = aagendamento['observacao'].upper(),
-                data_remocao = aagendamento['data_remocao'],
-                saida_prevista=aagendamento['saida_prevista'],
-                custo_ifd = aagendamento['custo_ifd'],
-                custo_estadia=aagendamento['custo_estadia'],
-                usuario_id = usuario_id
+                observacao = aagendamento['observacao'].upper(),#ok
+                data_remocao = aagendamento['data_remocao'],#ok
+                saida_prevista=aagendamento['saida_prevista'], #ok
+                custo_ifd = aagendamento['custo_ifd'],#ok
+                custo_estadia=aagendamento['custo_estadia'], #ok
+                usuario_id = usuario_id #ok
             )
 
             # Adiciona um novo Paciente
@@ -323,4 +358,107 @@ class Agendamento(Base):
         except BusinessException as err:
             raise Exception(err)
         except Exception as e:
-            return Exception('Erro desconhecido')     
+            return Exception('Erro desconhecido')
+        
+    def update_agendamento(usuario_id: int, agendamento_id: int, uagendamento):
+        try:
+            # Verifica se o usuário pode adicionar um novo agendamento ao sistema
+            acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Editar_Agendamentos')
+            if not acesso_liberado:
+                raise BusinessException('Usuário não possui permissão para editar agendamentos')            
+          ###  
+            
+             # Verifica os códigos informados
+            if int(uagendamento['agendamento_id']) != agendamento_id:
+                raise BusinessException('Erro na identificação do paciente')
+
+            # Verifica se os campos estão preenchidos
+            if uagendamento['paciente_id'] == '' or not uagendamento['paciente_id']:
+                raise BusinessException('O paciente é obrigatório')
+
+            if uagendamento['tipo_encaminhamento_id'] == '' or not uagendamento['tipo_encaminhamento_id']:
+                raise BusinessException('Tipo de encaminhamento do Paciente é obrigatório')
+
+            if uagendamento['tipo_doenca_id'] == '' or not uagendamento['tipo_doenca_id']:
+                raise BusinessException('Tipo de doença do Paciente é obrigatória')
+
+            if uagendamento['tipo_remocao_id'] == '' or not uagendamento['tipo_remocao_id']:
+                raise BusinessException('Tipo de remoção do Paciente é obrigatório')
+
+            if uagendamento['hospital_id'] == '' or not uagendamento['hospital_id']:
+                raise BusinessException('Hospital do Paciente é obrigatório')
+
+            if uagendamento['veiculo_id'] == '' or not uagendamento['veiculo_id']:
+                raise BusinessException('O veículo é obrigatório')
+
+            if uagendamento['responsavel_pac'] == '' or not uagendamento['responsavel_pac']:
+                raise BusinessException('responsável pelo Paciente é obrigatório')
+
+            if uagendamento['motorista_id'] == '' or not uagendamento['motorista_id']:
+                raise BusinessException('Motorista é obrigatório')
+
+            if uagendamento['data_remocao'] == '' or not uagendamento['data_remocao']:
+                raise BusinessException('Data de remoção do Paciente é obrigatória')
+            else:
+                uagendamento['data_remocao'] = Agendamento.formata_data(uagendamento['data_remocao'])
+
+            if uagendamento['saida_prevista'] == '' or not uagendamento['saida_prevista']:
+                raise BusinessException('Saida prevista do Paciente é obrigatória')
+            else:
+                uagendamento['saida_prevista'] = Agendamento.formata_data(uagendamento['saida_prevista'])            
+
+            if uagendamento['observacao'] == '' or not uagendamento['observacao']:
+                raise BusinessException('Observção é obrigatória')
+
+            if uagendamento['custo_ifd'] == '' or not uagendamento['custo_ifd']:
+                raise BusinessException('Custo IFD é obrigatório')
+
+            if uagendamento['custo_estadia'] == '' or not uagendamento['custo_estadia']:
+                raise BusinessException('Custo estadia é obrigatório')
+
+
+         ####                        
+            # Recupera os dados do agendamento informado
+            sql = select(Agendamento).where(Agendamento.agendamento_id == uagendamento['agendamento_id'])
+            agendamento = session.scalars(sql).one()
+            if not agendamento:
+                raise BusinessException('Agendamento informado não encontrado')                
+            
+             #Verifica se o nome do agendamento ou Sigla foi alterado.
+             #Se sim, precisa checar se já existe um cadastrado no sistema
+            #if agendamento.nome != uagendamento['nome']:
+                #rows = session.query(Agendamento).where(
+                    #and_(
+                        #Agendamento.nome == uagendamento['nome'],
+                        #Agendamento.agendamento_id != uagendamento['agendamento_id']
+                    #)).count()
+                #if rows > 0:
+                    #raise BusinessException('Agendamento já realizado')
+
+            # Atualiza o objeto a ser alterado
+            agendamento.agendamento_id = uagendamento['agendamento_id']
+            agendamento.paciente_id=uagendamento['paciente_id']
+            agendamento.tipo_encaminhamento_id=uagendamento['tipo_encaminhamento_id']
+            agendamento.tipo_doenca_id=uagendamento['tipo_doenca_id']
+            agendamento.tipo_remocao_id=uagendamento['tipo_remocao_id']
+            agendamento.hospital_id=uagendamento['hospital_id']
+            agendamento.veiculo_id=uagendamento['veiculo_id']
+            agendamento.responsavel_pac=uagendamento['responsavel_pac'].upper().strip()
+            agendamento.estado_geral_paciente=uagendamento['estado_geral_paciente'].upper().strip()
+            agendamento.motorista_id=uagendamento['motorista_id']
+            agendamento.observacao = uagendamento['observacao'].upper()
+            agendamento.data_remocao = uagendamento['data_remocao']
+            agendamento.saida_prevista= uagendamento['saida_prevista']
+            agendamento.custo_ifd = uagendamento['custo_ifd']
+            agendamento.custo_estadia=uagendamento['custo_estadia']
+            usuario_id = usuario_id
+
+            # Comita as alterações no banco de dados            
+            session.commit()
+            print(agendamento)
+            return agendamento
+        
+        except BusinessException as err:
+            raise Exception(err)
+        except Exception as e:
+            return Exception('Erro desconhecido')

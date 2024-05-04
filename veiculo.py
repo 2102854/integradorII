@@ -150,17 +150,13 @@ class Veiculo(Base):
             return Exception('Erro desconhecido')
 
     # Atualiza um Veículo Existente
-    def update_veiculo(usuario_id: int, veiculo_id: int, uveiculo):
+    def update_veiculo(usuario_id, uveiculo):
         try:
             # Verifica se o usuário pode atualizar veículo ao sistema
             acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Atualizar_Veiculos')
             if not acesso_liberado:
                 raise BusinessException('Usuário não possui permissão para editar os dados do veículo')
             
-            # Verifica os códigos informados
-            if int(uveiculo['veiculo_id']) != veiculo_id:
-                raise BusinessException('Erro na identificação do veículo')
-                        
             # Verifica se os campos estão preenchidos
             if uveiculo['modelo'] == '' or not uveiculo['modelo']:
                 raise BusinessException('O modelo é obrigatório')

@@ -58,7 +58,21 @@ def get_agendamentos(usuario_id: int):
         return make_response(agendamentos, 200)
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
-        return response, 404
+        return response, 401
+    
+#Recupera agendamento pelo id
+@schedulingRoute.route('/api/agendamentos/<int:agendamento_id>', methods=['GET'])
+@Auth.token_required
+def get_agendamentos_id(usuario_id: int, agendamento_id: int):
+    try:
+        agendamentos = Agendamento.get_agendamentos_id(usuario_id, agendamento_id)
+        p = dict_helper_obj(agendamentos) 
+        return make_response(p, 200)
+        #return make_response(agendamentos, 200)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 401
+
     
 # Adiciona uma agendamento no Banco de Dados
 @schedulingRoute.route('/api/agendamentos/add', methods=['POST'])
@@ -73,3 +87,17 @@ def add_agendamento(usuario_id: int):
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 404
+    
+# Edita um Usuario já cadastrado no Banco de Dados
+@schedulingRoute.route('/api/agendamentos/update/<int:agendamento_id>', methods=['PUT'])
+@Auth.token_required
+def update_agendamento(usuario_id: int, agendamento_id: int):
+    try:
+        # Recupera o objeto passado como parametro
+        uagendamento = request.get_json()
+        agendamento = Agendamento.update_agendamento(usuario_id, agendamento_id, uagendamento)
+        p = dict_helper_obj(agendamento)
+        return jsonify(agendamento = p)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 401

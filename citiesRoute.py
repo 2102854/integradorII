@@ -50,7 +50,7 @@ def add_cidade(usuario_id: int):
         return response, 404 
 
 # Edita uma Cidade já cadastrada no Banco de Dados
-@citiesRoute.route('/api/cidades/<int:cidade_id>', methods=['PUT'])
+@citiesRoute.route('/api/cidades/update/<int:cidade_id>', methods=['PUT'])
 @Auth.token_required
 def update_cidade(usuario_id: int, cidade_id: int):
     try:

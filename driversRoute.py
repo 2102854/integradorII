@@ -51,7 +51,7 @@ def add_motorista(usuario_id: int):
         return response, 404
 
 # Edita um Motorista já cadastrado no Banco de Dados
-@driversRoute.route('/api/motoristas/<int:motorista_id>', methods=['PUT'])
+@driversRoute.route('/api/motoristas/update/<int:motorista_id>', methods=['PUT'])
 @Auth.token_required
 def update_motorista(usuario_id: int, motorista_id: int):
     try:

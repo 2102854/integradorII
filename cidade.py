@@ -16,7 +16,6 @@ Base = declarative_base()
 engine = create_engine(parameters['SQLALCHEMY_DATABASE_URI'], echo=True)
 session = Session(engine)
 
-
 class Cidade(Base):
     # Identifica a tabela no Banco de Dados
     __tablename__ = "CIDADE"

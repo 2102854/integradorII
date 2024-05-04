@@ -45,8 +45,8 @@ def add_veiculo(usuario_id: int):
         # Recupera o objeto passado como parametro
         aveiculo = request.get_json()
         veiculo = Veiculo.add_veiculo(usuario_id, aveiculo)
-        v = dict_helper_obj(veiculo)
-        return jsonify(veiculo = v)
+        c = dict_helper_obj(veiculo)
+        return jsonify(veiculo = c)
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 404
@@ -58,9 +58,9 @@ def update_veiculo(usuario_id: int, veiculo_id: int):
     try:
         # Recupera o objeto passado como parametroCD SCRIPTS
         uveiculo = request.get_json()
-        veiculo = Veiculo.update_veiculo(usuario_id, veiculo_id, uveiculo)
-        v = dict_helper_obj(veiculo)
-        return jsonify(veiculo = v)
+        veiculo = Veiculo.update_veiculo(usuario_id, uveiculo)
+        p = dict_helper_obj(veiculo)
+        return jsonify(veiculo = p)
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
-        return response, 401     
+        return response, 401

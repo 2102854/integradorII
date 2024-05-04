@@ -1,3 +1,6 @@
+"""
+Módulo Hospitais
+"""
 from sqlalchemy import Column
 from sqlalchemy import create_engine, func, select, and_
 from sqlalchemy.dialects.sqlite import (INTEGER, VARCHAR)

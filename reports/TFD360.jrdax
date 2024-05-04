@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<jdbcDataAdapter class="net.sf.jasperreports.data.jdbc.JdbcDataAdapterImpl">
+  <name>TFD360</name>
+  <classpath>C:\temp\venv\reports\sqlitejdbc.jar</classpath>
+  <driver>org.sqlite.JDBC</driver>
+  <username></username>
+  <password></password>
+  <url>jdbc:sqlite:c:/temp/venv/integrador.db</url>
+  <database></database>
+  <savePassword>true</savePassword>
+  <serverAddress></serverAddress>
+</jdbcDataAdapter>

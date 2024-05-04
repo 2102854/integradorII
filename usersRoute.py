@@ -59,3 +59,34 @@ def change_user_permission(usuario_id):
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 401 
+    
+
+    # Adiciona uma usuário no Banco de Dados
+@usersRoute.route('/api/usuarios/add', methods=['POST'])
+@Auth.token_required
+def add_usuarios(usuario_id: int):
+    try:
+        # Recupera o objeto passado como parametro
+        ausuarios = request.get_json()
+        usuario = Usuario.add_usuarios(usuario_id, ausuarios)
+        c = dict_helper_obj(usuario)
+        return jsonify(usuario = c)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 404
+    
+    # Atualiza os dados do Usuário
+@usersRoute.route('/api/usuarios/update/<int:id>', methods=['PUT'])
+@Auth.token_required
+def update_usuarios(usuario_id: int, id: int):
+    try:
+        # Recupera o objeto passado como parametro
+        uusuario = request.get_json()
+        usuario = Usuario.update_usuarios(usuario_id, id, uusuario)
+        p = dict_helper_obj(usuario)
+        return jsonify(usuario = p)
+    except Exception as err:
+        response = jsonify({'message err': f'{err}'})
+        return response, 401
+    
+

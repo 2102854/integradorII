@@ -41,13 +41,14 @@ class Usuario (Base):
         return f"Usuario(usuario_id={self.usuario_id!r},primeiro_nome={self.primeiro_nome!r},sobrenome={self.sobrenome!r},\
             senha={self.senha!r},email={self.ativo!r},email={self.ativo!r},email={self.chave_publica!r})"
     
-    def __init__(self, primeiro_nome, sobrenome, username, senha, email, ativo):
+    def __init__(self, primeiro_nome, sobrenome, username, senha, email, ativo, chave_publica):
         self.primeiro_nome = primeiro_nome
         self.sobrenome = sobrenome
         self.username = username
         self.senha = senha
         self.email = email
         self.ativo = ativo
+        self.chave_publica = chave_publica
     
     # Retorna o resultado da Classe em formato json
     def obj_to_dict(self):  
@@ -172,7 +173,7 @@ class Usuario (Base):
             # tratamento de erro desconhecido
             return Exception('Erro desconhecido') 
 
-    def add_usuarios(usuario_id, primeiro_nome, sobrenome, email):
+    def add_usuarios(usuario_id, ausuarios):
         try:
             # Verifica se o usuário pode adicionar um novo usuario usuário
             acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Adicionar_Usuarios')
@@ -180,60 +181,62 @@ class Usuario (Base):
                 raise BusinessException('Usuário não possui permissão para adicionar novos usuários')
             
             # Verifica se os campos estão preenchidos
-            if primeiro_nome == '' or  not primeiro_nome:
+            if ausuarios['primeiro_nome'] == '' or  not ausuarios['primeiro_nome']:
                 raise BusinessException('Primeiro nome é obrigatório')
 
-            if sobrenome == '' or  not sobrenome:
+            if ausuarios['sobrenome'] == '' or  not ausuarios['sobrenome']:
                 raise BusinessException('Sobrenome é obrigatório')            
 
-            if email == '' or  not email:
-                raise BusinessException('E-mail é obrigatório')  
-
-            if Usuario.email_eh_valido(email):
+            if ausuarios['email'] == '' or  not ausuarios['email']:
+                raise BusinessException('E-mail é obrigatório') 
+                        
+            if not Usuario.email_eh_valido(ausuarios['email']):
                 raise BusinessException('E-mail não é Válido')                       
 
             # Verifica se já existe um e-mail cadastrado no banco de dados
-            rows = session.query(Usuario).where(Usuario.email == email).count()   
+            rows = session.query(Usuario).where(Usuario.email == ausuarios['email']).count()   
             if rows > 0:
                 raise BusinessException('E-mail já cadastrado no banco de dados')
 
             # Gera o username do usuário
-            n = sobrenome.split()
+            n = ausuarios['sobrenome'].upper().split()
             x = len(n)
 
             username = ''
             rows = 0
-            for l in primeiro_nome:
-                pn = pn.join(l)
+            for l in ausuarios['primeiro_nome'].upper():
+                pn = "".join(l)
                 username = pn + '.' + n[x -1]
                 # Verifcar se este username já existe no banco de dados
                 rows = session.query(Usuario).where(Usuario.username == username).count()
                 if rows == 0:
                     break
-                
+            key_public = str(uuid.uuid4())
+
             novoUsuario = Usuario(
-                primeiro_nome = primeiro_nome.upper().strip(),
-                sobrenome = sobrenome.upper().strip(),
+                primeiro_nome = ausuarios['primeiro_nome'].upper().strip(),
+                sobrenome = ausuarios['sobrenome'].upper().strip(),
                 username = username,
-                email = email.upper(),
+                email = ausuarios['email'].lower(),
                 ativo = True,
                 # Criptografa a senha do usuário 
                 # Gera senha aleatória
-                senha =  generate_password_hash(Usuario.generate_password()), 
+                senha =  generate_password_hash(Usuario.generate_password()),
                 # Gera uma chave de identificador único para o usuário
-                chave_publica = str(uuid.uuid4()) 
+                chave_publica = key_public
             )
 
             # Adiciona um novo usuário
+            
             session.add(novoUsuario)        
             session.commit()     
-            return 'ok'
+            return novoUsuario
         
         except BusinessException as err:
             raise Exception(err)
         except Exception:
             # tratamento de erro desconhecido
-            return Exception('Erro desconhecido')    
+            return Exception('Erro desconhecido')
     
     # Retorna os dados do usuário pelo parametro e-mail
     def get_usuario_by_email(email):
@@ -286,14 +289,49 @@ class Usuario (Base):
             # tratamento de erro desconhecido
             return Exception('Erro desconhecido')                  
         
-    def update_usuarios():
-        #Precisa corrigir este método, precisa tirar a senha e outras propriedades que não
-        #fazem parte do cadastro
-        sql = select(Usuario).where(Usuario.usuario_id == 3)
-        usuario = session.scalars(sql).one()
+    def update_usuarios(usuario_id: int, id: int, uusuario):
+        try:
+            # Verifica se o usuário pode adicionar um novo usuario usuário
+            acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Atualizar_Usuarios')
+            if not acesso_liberado:                
+                raise BusinessException('Usuário não possui permissão para atualizar usuários')
+            
+            # Verifica se os campos estão preenchidos
+            if uusuario['primeiro_nome'] == '' or  not uusuario['primeiro_nome']:
+                raise BusinessException('Primeiro nome é obrigatório')
+
+            if uusuario['sobrenome'] == '' or  not uusuario['sobrenome']:
+                raise BusinessException('Sobrenome é obrigatório')            
+
+            if uusuario['email'] == '' or  not uusuario['email']:
+                raise BusinessException('E-mail é obrigatório')  
+
+            if not Usuario.email_eh_valido(uusuario['email']):
+                raise BusinessException('E-mail não é Válido')                       
+
+            # Recupera os dados do agendamento informado
+            sql = select(Usuario).where(Usuario.usuario_id == uusuario['usuario_id'])
+            usuario = session.scalars(sql).one()
+            if not usuario:
+                raise BusinessException('Usuário informado não encontrado')        
+                                     
+            # Atualiza o objeto a ser alterado
+            usuario.primeiro_nome = uusuario['primeiro_nome'].upper().strip()
+            usuario.sobrenome = uusuario['sobrenome'].upper()
+            usuario.username = uusuario['username']
+            usuario.email = uusuario['email'].lower()
+            usuario.ativo = uusuario['ativo']
+            usuario_id = usuario_id
+            # Atualiza um novo usuário
                 
-        usuario.chave_publica = str(uuid.uuid4())    
-        session.commit()    
+            session.commit()     
+            return usuario
+        
+        except BusinessException as err:
+            raise Exception(err)
+        except Exception:
+            # tratamento de erro desconhecido
+            return Exception('Erro desconhecido')    
         
 
     # Retorna as permissões do usuário
