@@ -1,7 +1,3 @@
-"""
-Módulo Hospitais
-"""
-
 from flask import Blueprint
 import locale
 from dict_helper import dict_helper_list, dict_helper_obj
@@ -32,8 +28,9 @@ def get_hospitais(usuario_id: int):
 def get_hospital_id(usuario_id: int, hospital_id: int):
     try:
         hospital = Hospital.get_hospital_id(usuario_id, hospital_id)
-        e = dict_helper_list(hospital)
-        return make_response(e, 200)
+        h = dict_helper_obj(hospital)
+        return make_response(h, 200)
+    
     except Exception as err:
         response = jsonify({'message err': f'{err}'})
         return response, 404

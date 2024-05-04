@@ -1,6 +1,3 @@
-"""
-Módulo Hospitais
-"""
 from sqlalchemy import Column
 from sqlalchemy import create_engine, func, select, and_
 from sqlalchemy.dialects.sqlite import (INTEGER, VARCHAR)
@@ -26,23 +23,20 @@ class Hospital(Base):
 
     # Propriedades da Classe
     hospital_id = Column(INTEGER, primary_key=True)
-    endereco_id = Column(INTEGER)
     nome = Column(VARCHAR(250))
 
     # Método de Representação
     def __repr__(self) -> str:
-        return f"Hospital(hospital_id={self.hospital_id!r},endereco_id={self.endereco_id!r}, nome={self.nome!r})"
+        return f"Hospital(hospital_id={self.hospital_id!r}, nome={self.nome!r})"
 
     # Método de Inicialização
-    def __init__(self, endereco_id, nome):
-        self.endereco_id = endereco_id
+    def __init__(self, nome):
         self.nome = nome
 
     # Retorna o resultado da Classe em formato json
     def obj_to_dict(self):
         return {
             "hospital_id": int(self.hospital_id),
-            "endereco_id": int(self.endereco_id),
             "nome": self.nome
         }
 
@@ -89,10 +83,10 @@ class Hospital(Base):
                 raise BusinessException('Usuário não Possui permissão para visualização do hospital informado')
 
             # Retorna o grupo selecionado
-            hospital = session.query(Hospital).where(Hospital.hospital_id == hospital_id).all()
+            sql = select(Hospital).where(Hospital.hospital_id == hospital_id)
+            hospital = session.scalars(sql).one()
             if not hospital:
-                raise BusinessException('Hospital não encontrado')
-
+                raise BusinessException('Hospital não encontrado')       
             return hospital
 
         except BusinessException as err:
@@ -107,24 +101,18 @@ class Hospital(Base):
             if not acesso_liberado:
                 raise BusinessException('Usuário não possui permissão para adicionar novos hospitais')
 
-            # Verifica se os campos estão preenchidos
-            if ahospital['endereco_id'] == '' or not ahospital['endereco_id']:
-                raise BusinessException('O endereco é obrigatório')
-
             if ahospital['nome'] == '' or not ahospital['nome']:
                 raise BusinessException('Nome do hospital é obrigatório')
 
             # Verifica se já existe um hospital já cadastrado no banco de dados
             rows = session.query(Hospital).where(
                 and_(
-                    Hospital.endereco_id == ahospital['endereco_id'],
                     Hospital.nome == ahospital['nome']
                 )).count()
             if rows > 0:
                 raise BusinessException('Hospital já cadastrado com este nome')
 
             novoHospital = Hospital(
-                endereco_id=ahospital['endereco_id'],
                 nome=ahospital['nome']
             )
 
@@ -140,36 +128,32 @@ class Hospital(Base):
 
             # Atualiza um Hospital Existente
 
-    def update_hospital(usuario_id: int, hospital_id: int,  uhospital):
+    def update_hospital(usuario_id, hospital_id, uhospital):
         try:
             # Verifica se o usuário pode adicionar um novo pais ao sistema
             acesso_liberado = Permissao.valida_permissao_usuario(usuario_id, 'Pode_Atualizar_Hospitais')
             if not acesso_liberado:
                 raise BusinessException('Usuário não possui permissão para editar os dados do hospital')
 
-            # Verifica os códigos informados
-            if int(uhospital['hospital_id']) != hospital_id:
-                raise BusinessException('Erro na identificação do hospital')   
             
-            # Verifica se os campos estão preenchidos
-            if uhospital['endereco_id'] == '' or not uhospital['endereco_id']:
-                raise BusinessException('O endereço é obrigatório')
-
             if uhospital['nome'] == '' or not uhospital['nome']:
                 raise BusinessException('Nome do hospital é obrigatório')
+            
+            # Verifica os códigos informados
+            if int(uhospital['hospital_id']) != hospital_id:
+                raise BusinessException('Erro na identificação do hospital')
 
-            # Recupera os dados do hospital informado
-            sql = select(Hospital).where(Hospital.hospital_id == int(uhospital['hospital_id']))
+                # Recupera os dados do hospital informado
+            sql = select(Hospital).where(Hospital.hospital_id == uhospital['hospital_id'])
             hospital = session.scalars(sql).one()
             if not hospital:
                 raise BusinessException('Hospital informado não encontrado')
 
-            # Verifica se o nome do Hospital foi alterado.
+                # Verifica se o nome do Hospital foi alterado.
             # Se sim, precisa checar se já existe um cadastrado no sistema
             if hospital.nome != uhospital['nome']:
                 rows = session.query(Hospital).where(
                     and_(
-                        Hospital.endereco_id == uhospital['endereco_id'],
                         Hospital.nome == uhospital['nome']
                     )).count()
                 if rows > 0:
@@ -177,7 +161,7 @@ class Hospital(Base):
 
             # Atualiza o objeto a ser alterado
             hospital.nome = uhospital['nome'].upper().strip()
-            hospital.endereco_id = uhospital['endereco_id']
+           
 
             # Comita as alterações no banco de dados
             session.commit()
